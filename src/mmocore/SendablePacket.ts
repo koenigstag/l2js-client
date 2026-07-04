@@ -1,7 +1,7 @@
+import { BinaryWriter, FieldType, IPacketModel, Location } from "../network/GamePacketModel";
 import AbstractPacket from "./AbstractPacket";
-import MMOClient from "./MMOClient";
 
-export default abstract class SendablePacket extends AbstractPacket {
+export default abstract class SendablePacket extends AbstractPacket implements BinaryWriter {
   static readonly PACKET_MAX_SIZE: number = 4096;
   _buffer: Uint8Array = new Uint8Array(SendablePacket.PACKET_MAX_SIZE);
   _offset = 0;
@@ -71,5 +71,47 @@ export default abstract class SendablePacket extends AbstractPacket {
     this._buffer.set(buf, this._offset);
     this._offset += buf.byteLength;
     return this;
+  }
+
+  /**
+   * Writes the fields of the model to the buffer in the same order as readModel read them
+   * (order from @Field). The model should already be populated with data —
+   * writeModel only serializes, it doesn't compute anything.
+   */
+  protected writeModel<T extends IPacketModel>(instance: T): void {
+    for (const { key, type } of instance.getSchema()) {
+      const value = (instance as unknown as Record<string, unknown>)[key];
+      this.writeByType(type, value);
+    }
+  }
+
+  private writeByType(type: FieldType, value: unknown): void {
+    switch (type) {
+      case "C":
+        this.writeC(value as number);
+        return;
+      case "H":
+        this.writeH(value as number);
+        return;
+      case "D":
+        this.writeD(value as number);
+        return;
+      case "Q":
+        this.writeQ(value as number);
+        return;
+      case "F":
+        this.writeF(value as number);
+        return;
+      case "S":
+        this.writeS(value as string);
+        return;
+      case "Loc": {
+        // Symmetric to readLoc: three Int32 in a row (x, y, z).
+        // If the order/types of Loc fields differ in your project, adjust here.
+        const loc = value as Location;
+        this.writeD(loc[0]).writeD(loc[1]).writeD(loc[2]);
+        return;
+      }
+    }
   }
 }

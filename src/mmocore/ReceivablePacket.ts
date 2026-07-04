@@ -1,6 +1,7 @@
+import { BinaryReader, FieldType, IPacketModel, Location } from "../network/GamePacketModel";
 import AbstractPacket from "./AbstractPacket";
 
-export default abstract class ReceivablePacket extends AbstractPacket {
+export default abstract class ReceivablePacket extends AbstractPacket implements BinaryReader {
   _buffer!: Uint8Array;
   _offset = 0;
   _view!: DataView;
@@ -60,7 +61,40 @@ export default abstract class ReceivablePacket extends AbstractPacket {
     return Uint8Array.from(value);
   }
 
-  readLoc(): number[] {
+  readLoc(): Location {
     return [this.readD(), this.readD(), this.readD()]; // X, Y, Z
+  }
+
+  /**
+   * Creates an instance of the model and sequentially fills its fields,
+   * reading the buffer in the order specified by `order` parameter in @Field(type, order).
+   */
+  protected readModel<T extends IPacketModel>(Model: new () => T): T {
+    const instance = new Model();
+
+    for (const { key, type } of instance.getSchema()) {
+      (instance as Record<string, unknown>)[key] = this.readByType(type);
+    }
+
+    return instance;
+  }
+
+  private readByType(type: FieldType): unknown {
+    switch (type) {
+      case "C":
+        return this.readC();
+      case "H":
+        return this.readH();
+      case "D":
+        return this.readD();
+      case "Q":
+        return this.readQ();
+      case "F":
+        return this.readF();
+      case "S":
+        return this.readS();
+      case "Loc":
+        return this.readLoc();
+    }
   }
 }
