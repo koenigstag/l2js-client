@@ -1,33 +1,47 @@
+import { BasePacketModel, C, D, ArrayModel, H, Loc, Location } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
 
+class SubjectModel extends BasePacketModel {
+  @D() _targetId: number;
+  @D() _damage: number;
+  @C() _flags: number;
+}
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+
+  @D() AttackerObjectId: number;
+
+  @D() _targetId: number;
+  @D() _damage: number;
+  @C() _flags: number;
+
+  @Loc() attackerLoc: Location;
+
+  @H() _hitSize: number;
+
+  @ArrayModel(SubjectModel, "_hitSize")
+  _subjects: SubjectModel[];
+
+  @Loc() targetLoc: Location;
+}
+
 export default class Attack extends GameClientPacket {
-  AttackerObjectId: number = 0;
+  AttackerObjectId = 0;
   Subjects: number[] = [];
 
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
+    const packetData = this.readModel(PacketModel);
 
-    this.AttackerObjectId = this.readD();
+    this.AttackerObjectId = packetData.AttackerObjectId;
 
-    const _targetId = this.readD();
-    const _damage = this.readD();
-    const _flags = this.readC();
+    this.Subjects.push(packetData._targetId);
 
-    this.Subjects.push(_targetId);
-
-    const [_attackerX, _attackerY, _attackerZ] = this.readLoc();
-
-    const _hitSize = this.readH();
-    for (let i = 0; i < _hitSize; i++) {
-      const _targetId1 = this.readD();
-      const _damage1 = this.readD();
-      const _flags1 = this.readC();
-
+    packetData._subjects.forEach((subject) => {
+      const _targetId1 = subject._targetId;
       this.Subjects.push(_targetId1);
-    }
-
-    const [_targetX, _targetY, _targetZ] = this.readLoc();
+    });
 
     return true;
   }

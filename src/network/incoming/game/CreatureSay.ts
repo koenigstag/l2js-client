@@ -1,21 +1,30 @@
+import { BasePacketModel, C, D, S } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
 
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+  @D() ObjectId: number;
+  @D() Type: number;
+  @S() CharName: string; // or readD() ???
+  @D() NpcStringId: number;
+}
+
 export default class CreatureSay extends GameClientPacket {
-  ObjectId: number = 0;
-  Type: number = 0;
-  CharName: string = "";
-  NpcStringId: number = 0;
+  ObjectId = 0;
+  Type = 0;
+  CharName = "";
+  NpcStringId = 0;
   Messages: string[] = [];
 
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
-    this.ObjectId = this.readD();
-    this.Type = this.readD();
+    const packetData = this.readModel(PacketModel);
 
-    this.CharName = this.readS(); // or readD() ???
+    this.ObjectId = packetData.ObjectId;
+    this.Type = packetData.Type;
+    this.CharName = packetData.CharName;
+    this.NpcStringId = packetData.NpcStringId;
 
-    this.NpcStringId = this.readD();
     while (this._offset + 2 < this._buffer.byteLength) {
       this.Messages.push(this.readS());
     }

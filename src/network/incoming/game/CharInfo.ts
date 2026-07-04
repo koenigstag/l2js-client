@@ -5,6 +5,104 @@ import { HairStyle } from "../../../enums/HairStyle";
 import { HairColor } from "../../../enums/HairColor";
 import { Face } from "../../../enums/Face";
 import { ClassId } from "../../../enums/ClassId";
+import { BasePacketModel, C, D, F, ArrayModel, H, Loc, Location, S } from "../../GamePacketModel";
+import { transformIs0, transformIs1 } from "../../../utils";
+
+class PaperdollDisplayModel extends BasePacketModel {
+  @D() _slotItemDisplayId: number;
+}
+
+class PaperdollAugmentationModel extends BasePacketModel {
+  @D() _slotItemAugmentationId: number;
+}
+
+class CubicModel extends BasePacketModel {
+  @H() _cubicId: number;
+}
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+  @Loc() location: Location;
+  @D() _vehicleId: number;
+  @D() ObjectId: number;
+  @S() Name: string;
+  @D() Race: number;
+  @D() Sex: number;
+  @D() BaseClassId: number;
+
+  _paperdollOrder = CharInfo.PAPERDOLL_ORDER;
+
+  @ArrayModel(PaperdollDisplayModel, "_paperdollOrder")
+  _paperdoll: PaperdollDisplayModel[];
+
+  @ArrayModel(PaperdollAugmentationModel, "_paperdollOrder")
+  _paperdollAugmentation: PaperdollAugmentationModel[];
+
+  @D() _talismanSlots: number;
+  @D(transformIs1) _canEquipCloak: boolean;
+  @D() _pvpFlag: number;
+  @D() Karma: number;
+  @D() MAtkSpd: number;
+  @D() PAtkSpd: number;
+  @D() _pad0: number;
+  @D() RunSpeed: number;
+  @D() WalkSpeed: number;
+  @D() SwimRunSpeed: number;
+  @D() SwimWalkSpeed: number;
+  @D() FlyRunSpeed: number;
+  @D() FlyWalkSpeed: number;
+  @D() _flyRunSpd1: number;
+  @D() _flyWalkSpd1: number;
+  @F() SpeedMultiplier: number;
+  @F() AtkSpdMultiplier: number;
+  @F() _collisionRadius: number;
+  @F() _collisionHeight: number;
+  @D() HairStyle: number;
+  @D() HairColor: number;
+  @D() Face: number;
+  @S() Title: string;
+  @D() _clanId: number;
+  @D() _clanCrestId: number;
+  @D() _clanAllyId: number;
+  @D() _clanAllyCrestId: number;
+  @C(transformIs0) IsSitting: boolean; // standing = 1 sitting = 0
+  @C(transformIs1) IsRunning: boolean; // running = 1 walking = 0
+  @C(transformIs1) IsInCombat: boolean;
+  @C(transformIs1) _deadInOlympiad: boolean;
+  @C(transformIs1) _invisible: boolean;
+  @C() _mountType: number; // 1-on Strider, 2-on Wyvern, 3-on Great Wolf, 0-no mount
+  @C() _privateStoreType: number;
+  @H() _cubicsSize: number;
+  @ArrayModel(CubicModel, "_cubicsSize")
+  _cubics: CubicModel[];
+  @C() _isInPartyMatchRoom: number;
+  @D() _abnormalVisualEffects: number;
+  @C() _isFlyingOrSwimming: number; // 1 - in water, 2 = fly, else 0
+  @H() RecommHave: number;
+  @D() _mountNpcId: number;
+  @D() ClassId: number;
+  @D() _pad1: number;
+  @C() _enchantEffect: number;
+  @C() _teamId: number;
+  @D() _clanCrestLargeId: number;
+  @C(transformIs1) IsNoble: boolean;
+  @C(transformIs1) IsHero: boolean;
+  @C(transformIs1) IsFishing: boolean;
+  @D() _fishX: number;
+  @D() _fishY: number;
+  @D() _fishZ: number;
+  @D() _nameColor: number;
+  @D() Heading: number;
+  @D() _pledgeClass: number;
+  @D() _pledgeType: number;
+  @D() _titleColor: number;
+  @D() _cursedWeaponLevel: number;
+  @D() _reputationScore: number;
+  @D() _transformationDisplayId: number;
+  @D() _agathionId: number;
+  @D() _pad3: number;
+  @D() _abnormalVisualEffectSpecial: number;
+}
 
 export default class CharInfo extends GameClientPacket {
   static readonly PAPERDOLL_ORDER: number[] = [
@@ -35,124 +133,40 @@ export default class CharInfo extends GameClientPacket {
 
   // @Override
   readImpl(): boolean {
-    const _id: number = this.readC();
-    const [_x, _y, _z] = this.readLoc();
-    const _vehicleId = this.readD();
-    this.Char.ObjectId = this.readD();
+    const packetData = this.readModel(PacketModel);
 
-    this.Char.X = _x;
-    this.Char.Y = _y;
-    this.Char.Z = _z;
-
-    this.Char.Name = this.readS();
-
-    this.Char.Race = this.readD();
-    this.Char.Sex = this.readD();
-    this.Char.BaseClassId = (ClassId as any)[this.readD()];
-
-    CharInfo.PAPERDOLL_ORDER.forEach(() => {
-      const _slotItemDisplayId = this.readD();
-    });
-
-    CharInfo.PAPERDOLL_ORDER.forEach(() => {
-      const _slotItemAugmentationId = this.readD();
-    });
-
-    const _talismanSlots = this.readD();
-    const _canEquipCloak = this.readD() === 1;
-
-    const _pvpFlag = this.readD();
-    this.Char.Karma = this.readD();
-
-    this.Char.MAtkSpd = this.readD();
-    this.Char.PAtkSpd = this.readD();
-
-    const _pad0 = this.readD();
-
-    this.Char.RunSpeed = this.readD();
-    this.Char.WalkSpeed = this.readD();
-    this.Char.SwimRunSpeed = this.readD();
-    this.Char.SwimWalkSpeed = this.readD();
-    this.Char.FlyRunSpeed = this.readD();
-    this.Char.FlyWalkSpeed = this.readD();
-    const _flyRunSpd1 = this.readD();
-    const _flyWalkSpd1 = this.readD();
-
-    this.Char.SpeedMultiplier = this.readF();
-    this.Char.AtkSpdMultiplier = this.readF();
-
-    const _collisionRadius = this.readF();
-    const _collisionHeight = this.readF();
-
-    this.Char.HairStyle = (HairStyle as any)[this.readD()];
-    this.Char.HairColor = (HairColor as any)[this.readD()];
-    this.Char.Face = (Face as any)[this.readD()];
-
-    this.Char.Title = this.readS();
-
-    const _clanId = this.readD();
-    const _clanCrestId = this.readD();
-    const _clanAllyId = this.readD();
-    const _clanAllyCrestId = this.readD();
-
-    this.Char.IsSitting = this.readC() === 0; // standing = 1 sitting = 0
-    this.Char.IsRunning = this.readC() === 1; // running = 1 walking = 0
-    this.Char.IsInCombat = this.readC() === 1;
-
-    const _deadInOlympiad = this.readC() === 1;
-    const _invisible = this.readC() === 1;
-
-    const _mountType = this.readC(); // 1-on Strider, 2-on Wyvern, 3-on Great Wolf, 0-no mount
-
-    const _privateStoreType = this.readC();
-
-    const _cubicsSize = this.readH();
-    for (let i = 0; i < _cubicsSize; i++) {
-      const _cubicId = this.readH();
-    }
-
-    const _isInPartyMatchRoom = this.readC();
-    const _abnormalVisualEffects = this.readD();
-
-    const _isFlyingOrSwimming = this.readC(); // 1 - in water, 2 = fly, else 0
-
-    this.Char.RecommHave = this.readH();
-    const _mountNpcId = this.readD() - 1000000;
-    this.Char.ClassId = (ClassId as any)[this.readD()];
-
-    const _pad1 = this.readD();
-
-    const _enchantEffect = this.readC();
-
-    const _teamId = this.readC();
-    const _clanCrestLargeId = this.readD();
-
-    this.Char.IsNoble = this.readC() === 1;
-    this.Char.IsHero = this.readC() === 1;
-    this.Char.IsFishing = this.readC() === 1;
-
-    const _fishX = this.readD();
-    const _fishY = this.readD();
-    const _fishZ = this.readD();
-
-    const _nameColor = this.readD();
-
-    this.Char.Heading = this.readD();
-
-    const _pledgeClass = this.readD();
-    const _pledgeType = this.readD();
-
-    const _titleColor = this.readD();
-
-    const _cursedWeaponLevel = this.readD();
-
-    const _reputationScore = this.readD();
-    const _transformationDisplayId = this.readD();
-    const _agathionId = this.readD();
-
-    const _pad3 = this.readD();
-
-    const _abnormalVisualEffectSpecial = this.readD();
+    this.Char.ObjectId = packetData.ObjectId;
+    this.Char.X = packetData.location[0];
+    this.Char.Y = packetData.location[1];
+    this.Char.Z = packetData.location[2];
+    this.Char.Name = packetData.Name;
+    this.Char.Race = packetData.Race;
+    this.Char.Sex = packetData.Sex;
+    this.Char.BaseClassId = (ClassId as any)[packetData.BaseClassId];
+    this.Char.Karma = packetData.Karma;
+    this.Char.MAtkSpd = packetData.MAtkSpd;
+    this.Char.PAtkSpd = packetData.PAtkSpd;
+    this.Char.RunSpeed = packetData.RunSpeed;
+    this.Char.WalkSpeed = packetData.WalkSpeed;
+    this.Char.SwimRunSpeed = packetData.SwimRunSpeed;
+    this.Char.SwimWalkSpeed = packetData.SwimWalkSpeed;
+    this.Char.FlyRunSpeed = packetData.FlyRunSpeed;
+    this.Char.FlyWalkSpeed = packetData.FlyWalkSpeed;
+    this.Char.SpeedMultiplier = packetData.SpeedMultiplier;
+    this.Char.AtkSpdMultiplier = packetData.AtkSpdMultiplier;
+    this.Char.HairStyle = (HairStyle as any)[packetData.HairStyle];
+    this.Char.HairColor = (HairColor as any)[packetData.HairColor];
+    this.Char.Face = (Face as any)[packetData.Face];
+    this.Char.Title = packetData.Title;
+    this.Char.IsSitting = packetData.IsSitting;
+    this.Char.IsRunning = packetData.IsRunning;
+    this.Char.IsInCombat = packetData.IsInCombat;
+    this.Char.RecommHave = packetData.RecommHave;
+    this.Char.ClassId = (ClassId as any)[packetData.ClassId];
+    this.Char.IsNoble = packetData.IsNoble;
+    this.Char.IsHero = packetData.IsHero;
+    this.Char.IsFishing = packetData.IsFishing;
+    this.Char.Heading = packetData.Heading;
 
     return true;
   }

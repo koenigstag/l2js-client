@@ -3,91 +3,120 @@ import L2User from "../../../entities/L2User";
 import { ClassId } from "../../../enums/ClassId";
 import { Race } from "../../../enums/Race";
 import { Sex } from "../../../enums/Sex";
+import { ArrayModel, BasePacketModel, C, D, F, Q, S } from "../../GamePacketModel";
 import GameServerPacket from "../../outgoing/game/GameServerPacket";
 import GameClientPacket from "./GameClientPacket";
+
+class PaperdollModel extends BasePacketModel {
+  @D() _unknD: number;
+}
+
+class UserModel extends BasePacketModel {
+  @S() Name: string;
+  @D() ObjectId: number;
+  @S() _loginName: string;
+  @D() _sessionId: number;
+  @D() ClanId: number;
+  @D() _builderLevel: number;
+  @D() Sex: number;
+  @D() Race: number;
+  @D() BaseClassId: number;
+  @D() _active: number;
+  @D() X: number;
+  @D() Y: number;
+  @D() Z: number;
+  @D() Hp: number;
+  @D() Mp: number;
+  @D() Sp: number;
+  @Q() Exp: number
+  @F() ExpPercent: number;
+  @D() Level: number;
+  @D() Karma: number
+  @D() PkKills: number;
+  @D() PvpKills: number
+  @D() _unknD1: number;
+  @D() _unknD2: number;
+  @D() _unknD3: number;
+  @D() _unknD4: number;
+  @D() _unknD5: number;
+  @D() _unknD6: number;
+  @D() _unknD7: number;
+  _paperdollOrder = GameServerPacket.PAPERDOLL_ORDER;
+  @ArrayModel(PaperdollModel, "_paperdollOrder") _paperdoll: PaperdollModel[];
+  @D() HairStyle: number;
+  @D() HairColor: number;
+  @D() Face: number;
+  @F() MaxHp: number;
+  @F() MaxMp: number;
+  @D() _daysLeftBeforeDelete: number;
+  @D() ClassId: number;
+  @D() _c3AutoSelectChar: number;
+  @C() _enchantEffect: number;
+  @D() _augmentationId: number;
+  @D() _hideTransformation: number;
+  @D() _notImplementedPetId: number;
+  @D() _notImplementedPetLevel: number;
+  @D() _notImplementedPetMaxFood: number;
+  @D() _notImplementedPetCurrentFood: number;
+  @F() _notImplementedPetMaxHP: number;
+  @F() _notImplementedPetMaxMP: number;
+  @D() Vitality: number;
+}
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+  @D() characterPackagesSize: number;
+  @D() _charMaxNumber: number;
+  @D() _pad: number;
+
+  @ArrayModel(UserModel, "characterPackagesSize") characterPackages: UserModel[];
+}
 
 export default class CharSelectionInfo extends GameClientPacket {
   characterPackagesSize!: number;
 
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
+    const packetData = this.readModel(PacketModel);
+
+    this.characterPackagesSize = packetData.characterPackagesSize;
+
     const _characterPackages: L2ObjectCollection<L2User> = new L2ObjectCollection();
 
-    this.characterPackagesSize = this.readD();
-    const _charMaxNumber = this.readD();
-    const _pad = this.readC();
-
     for (let i = 0; i < this.characterPackagesSize; i++) {
+      const userData = packetData.characterPackages[i];
+
       const char: L2User = new L2User();
 
-      char.Name = this.readS();
+      char.Name = userData.Name;
 
-      char.ObjectId = this.readD();
-      const _loginName = this.readS();
-      const _sessionId = this.readD();
-      const clanId = this.readD();
-      const _builderLevel = this.readD();
+      char.ObjectId = userData.ObjectId;
+      char.Sex = (Sex as any)[userData.Sex];
+      char.Race = (Race as any)[userData.Race];
+      char.BaseClassId = (ClassId as any)[userData.BaseClassId];
 
-      char.Sex = (Sex as any)[this.readD()];
-      char.Race = (Race as any)[this.readD()];
-      char.BaseClassId = (ClassId as any)[this.readD()];
+      char.X = userData.X;
+      char.Y = userData.Y;
+      char.Z = userData.Z;
 
-      const _active = this.readD(); // ??
+      char.Hp = userData.Hp;
+      char.Mp = userData.Mp;
 
-      char.X = this.readD();
-      char.Y = this.readD();
-      char.Z = this.readD();
+      char.Sp = userData.Sp;
+      char.Exp = userData.Exp;
+      char.ExpPercent = userData.ExpPercent;
 
-      char.Hp = this.readF();
-      char.Mp = this.readF();
+      char.Level = userData.Level;
+      char.Karma = userData.Karma;
+      char.PkKills = userData.PkKills;
+      char.PvpKills = userData.PvpKills;
 
-      char.Sp = this.readD();
-      char.Exp = this.readQ();
-      char.ExpPercent = this.readF();
+      char.MaxHp = userData.MaxHp;
+      char.MaxMp = userData.MaxMp;
 
-      char.Level = this.readD();
-      char.Karma = this.readD();
-      char.PkKills = this.readD();
-      char.PvpKills = this.readD();
+      char.ClassId = (ClassId as any)[userData.ClassId];
 
-      const _unknD1 = this.readD();
-      const _unknD2 = this.readD();
-      const _unknD3 = this.readD();
-      const _unknD4 = this.readD();
-      const _unknD5 = this.readD();
-      const _unknD6 = this.readD();
-      const _unknD7 = this.readD();
-
-      const _paperdoll = [];
-      GameServerPacket.PAPERDOLL_ORDER.forEach(() => {
-        _paperdoll.push(this.readD());
-      });
-
-      const hairStyle = this.readD();
-      const hairColor = this.readD();
-      const face = this.readD();
-
-      char.MaxHp = this.readF();
-      char.MaxMp = this.readF();
-
-      const _daysLeftBeforeDelete = this.readD();
-      char.ClassId = (ClassId as any)[this.readD()];
-      const _c3AutoSelectChar = this.readD(); // is this char active - the last one used
-
-      const _enchantEffect = this.readC();
-      const augmentationId = this.readD();
-
-      const _hideTransformation = this.readD();
-
-      const _notImplementedPetId = this.readD();
-      const _notImplementedPetLevel = this.readD();
-      const _notImplementedPetMaxFood = this.readD();
-      const _notImplementedPetCurrentFood = this.readD();
-      const _notImplementedPetMaxHP = this.readF();
-      const _notImplementedPetMaxMP = this.readF();
-
-      char.Vitality = this.readD();
+      char.Vitality = userData.Vitality;
 
       _characterPackages.add(char);
     }

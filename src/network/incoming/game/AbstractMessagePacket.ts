@@ -1,4 +1,56 @@
+import { BasePacketModel, D, ArrayModel, Loc, Location, NestedModel, Q, S } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
+
+class ParamSkillModel extends BasePacketModel {
+  @D() _skillId: number;
+  @D() _skillLevel: number;
+}
+
+class ParamModel extends BasePacketModel {
+  @D() _paramType: number;
+
+  @S({
+    if: (o: ParamModel) =>
+      [AbstractMessagePacket.TYPE_TEXT, AbstractMessagePacket.TYPE_PLAYER_NAME].includes(o._paramType),
+  })
+  _paramString?: string;
+
+  @Q({
+    if: (o: ParamModel) => o._paramType === AbstractMessagePacket.TYPE_LONG_NUMBER,
+  })
+  _paramLong?: number;
+
+  @D({
+    if: (o: ParamModel) =>
+      [
+        AbstractMessagePacket.TYPE_ITEM_NAME,
+        AbstractMessagePacket.TYPE_CASTLE_NAME,
+        AbstractMessagePacket.TYPE_INT_NUMBER,
+        AbstractMessagePacket.TYPE_NPC_NAME,
+        AbstractMessagePacket.TYPE_ELEMENT_NAME,
+        AbstractMessagePacket.TYPE_SYSTEM_STRING,
+        AbstractMessagePacket.TYPE_INSTANCE_NAME,
+        AbstractMessagePacket.TYPE_DOOR_NAME,
+      ].includes(o._paramType),
+  })
+  _paramDigits?: number;
+
+  @Loc({
+    if: (o: ParamModel) => o._paramType === AbstractMessagePacket.TYPE_ZONE_NAME,
+  })
+  _paramLoc?: Location;
+
+  @NestedModel(ParamSkillModel, { if: (o: ParamModel) => o._paramType === AbstractMessagePacket.TYPE_SKILL_NAME })
+  _skill?: ParamSkillModel;
+}
+
+export class MessagePacketModel extends BasePacketModel {
+  @D() messageId: number;
+  @D() _paramsLength: number;
+
+  @ArrayModel(ParamModel, "_paramsLength")
+  _params: ParamModel[];
+}
 
 export default abstract class AbstractMessagePacket extends GameClientPacket {
   // 15 exists in goddess of destruction but also may works in h5 needs to be verified!
@@ -24,52 +76,26 @@ export default abstract class AbstractMessagePacket extends GameClientPacket {
   messageParams = new Array<any>();
 
   readMe(): void {
-    this.messageId = this.readD();
-    const _paramsLength = this.readD();
+    const packetData = this.readModel(MessagePacketModel);
 
-    for (let i = 0; i < _paramsLength; i++) {
-      const _paramType = this.readD();
-      switch (_paramType) {
-        case AbstractMessagePacket.TYPE_TEXT:
-        case AbstractMessagePacket.TYPE_PLAYER_NAME:
-          this.messageParams.push(this.readS());
-          break;
+    this.setData(packetData);
+  }
 
-        case AbstractMessagePacket.TYPE_LONG_NUMBER:
-          this.messageParams.push(this.readQ());
-          break;
+  setData(packetData: MessagePacketModel) {
+    this.messageId = packetData.messageId;
 
-        case AbstractMessagePacket.TYPE_ITEM_NAME:
-        case AbstractMessagePacket.TYPE_CASTLE_NAME:
-        case AbstractMessagePacket.TYPE_INT_NUMBER:
-        case AbstractMessagePacket.TYPE_NPC_NAME:
-        case AbstractMessagePacket.TYPE_ELEMENT_NAME:
-        case AbstractMessagePacket.TYPE_SYSTEM_STRING:
-        case AbstractMessagePacket.TYPE_INSTANCE_NAME:
-        case AbstractMessagePacket.TYPE_DOOR_NAME:
-          this.messageParams.push(this.readD());
-          break;
-
-        case AbstractMessagePacket.TYPE_SKILL_NAME:
-          this.messageParams.push([
-            /** SkillId */ this.readD(),
-            /** SkillLevel */ this.readD()
-          ]);
-          break;
-
-        case AbstractMessagePacket.TYPE_ZONE_NAME:
-          this.messageParams.push([
-            /** x */ this.readD(),
-            /** y */ this.readD(),
-            /** z */ this.readD()
-          ]);
-          break;
-        default:
-          this.logger.warn(
-            "Unknown message packet type: " + _paramType.toString(16)
-          );
-          return;
+    this.messageParams = packetData._params.map((param) => {
+      if (param._paramString !== undefined) {
+        return param._paramString;
+      } else if (param._paramLong !== undefined) {
+        return param._paramLong;
+      } else if (param._paramDigits !== undefined) {
+        return param._paramDigits;
+      } else if (param._paramLoc !== undefined) {
+        return [param._paramLoc[0], param._paramLoc[1], param._paramLoc[2]];
+      } else if (param._skill !== undefined) {
+        return [param._skill._skillId, param._skill._skillLevel];
       }
-    }
+    });
   }
 }
