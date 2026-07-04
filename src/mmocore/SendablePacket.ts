@@ -73,15 +73,38 @@ export default abstract class SendablePacket extends AbstractPacket implements B
     return this;
   }
 
+  writeLoc(loc: Location): this {
+    this.writeD(loc[0]).writeD(loc[1]).writeD(loc[2]);
+    return this;
+  }
+
   /**
    * Writes the fields of the model to the buffer in the same order as readModel read them
    * (order from @Field). The model should already be populated with data —
    * writeModel only serializes, it doesn't compute anything.
    */
   protected writeModel<T extends IPacketModel>(instance: T): void {
-    for (const { key, type } of instance.getSchema()) {
-      const value = (instance as unknown as Record<string, unknown>)[key];
-      this.writeByType(type, value);
+    const source = instance as unknown as Record<string, unknown>;
+
+    for (const field of instance.getSchema()) {
+      if (field.kind === "scalar" && (!field.condition || field.condition(source))) {
+        const value = source[field.key];
+        this.writeByType(field.type, field.transform ? field.transform(value) : value);
+        continue;
+      }
+
+      if (field.kind === "nested" && (!field.condition || field.condition(source))) {
+        const nestedInstance = source[field.key] as IPacketModel;
+        this.writeModel(field.transform ? field.transform(nestedInstance) : nestedInstance);
+        continue;
+      }
+
+      if (field.kind === "array" && (!field.condition || field.condition(source))) {
+        const items = source[field.key] as IPacketModel[];
+        for (const item of items) {
+          this.writeModel(field.transform ? field.transform(item) : item);
+        }
+      }
     }
   }
 
@@ -108,8 +131,7 @@ export default abstract class SendablePacket extends AbstractPacket implements B
       case "Loc": {
         // Symmetric to readLoc: three Int32 in a row (x, y, z).
         // If the order/types of Loc fields differ in your project, adjust here.
-        const loc = value as Location;
-        this.writeD(loc[0]).writeD(loc[1]).writeD(loc[2]);
+        this.writeLoc(value as Location);
         return;
       }
     }

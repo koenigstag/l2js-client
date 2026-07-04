@@ -71,9 +71,29 @@ export default abstract class ReceivablePacket extends AbstractPacket implements
    */
   protected readModel<T extends IPacketModel>(Model: new () => T): T {
     const instance = new Model();
+    const target = instance as unknown as Record<string, unknown>;
 
-    for (const { key, type } of instance.getSchema()) {
-      (instance as Record<string, unknown>)[key] = this.readByType(type);
+    for (const field of instance.getSchema()) {
+      if (field.kind === "scalar" && (!field.condition || field.condition(target))) {
+        const value = this.readByType(field.type);
+        target[field.key] = field.transform ? field.transform(value) : value;
+        continue;
+      }
+
+      if (field.kind === "nested" && (!field.condition || field.condition(target))) {
+        const nestedInstance = this.readModel(field.model);
+        target[field.key] = field.transform ? field.transform(nestedInstance) : nestedInstance;
+        continue;
+      }
+
+      if (field.kind === "array" && (!field.condition || field.condition(target))) {
+        const count = target[field.countKey] as number;
+        const items: IPacketModel[] = [];
+        for (let i = 0; i < count; i++) {
+          items.push(this.readModel(field.model));
+        }
+        target[field.key] = field.transform ? field.transform(items) : items;
+      }
     }
 
     return instance;

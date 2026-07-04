@@ -3,7 +3,7 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "es6",
-    "lib": ["es5", "es6", "dom"],
+    "lib": ["es5", "es6", "es2016", "dom"],
     "declaration": true,
     "outDir": "./dist",
     "rootDir": "./src",
@@ -13,7 +13,8 @@
     "noImplicitAny": true,
     "strictNullChecks": true,
     "esModuleInterop": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "strictPropertyInitialization": false
   },
   "include": ["**/*"],
   "exclude": ["**/dist/**/*.d.ts", "./*.js", "dist", "node_modules", "examples", "proxy"]
