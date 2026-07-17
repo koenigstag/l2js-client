@@ -1,10 +1,17 @@
+import { BasePacketModel, C } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+}
+
 export default class ShortCutInit extends GameClientPacket {
   // @Override
   readImpl(): boolean {
+    const packetData = this.readModel(PacketModel);
+
     // var _shortCuts: Shortcut[] = [];
 
-    // let _id = this.readC();
     // let _shortCutsLength = this.readD();
     // for (var i = 0; i < _shortCutsLength; i++) {
     //   var sc = new Shortcut();

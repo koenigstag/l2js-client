@@ -1,40 +1,52 @@
 import { ShortcutType } from "../../../enums/ShortcutType";
+import { BasePacketModel, C, D, NestedModel } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
+
+class ItemShortcutModel extends BasePacketModel {
+  @D() _itemId: number;
+  @D() _charType: number;
+  @D() _sharedReuseGroup: number;
+  @D() _unk0: number;
+  @D() _unk1: number;
+  @D() _itemAugmentId: number;
+}
+
+class SkillShortcutModel extends BasePacketModel {
+  @D() _skillId: number;
+  @D() _skillLevel: number;
+  @C() _c5: number;
+  @D() _charType1: number;
+}
+
+class OtherShortcutModel extends BasePacketModel {
+  @D() _uId: number;
+  @D() _charType2: number;
+}
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+  @D() _shortcutType: number;
+  @D() _c4Client: number; // slot + (page * 12)
+
+  @NestedModel(ItemShortcutModel, { if: (o: PacketModel) => o._shortcutType === ShortcutType.ITEM })
+  _item?: ItemShortcutModel;
+
+  @NestedModel(SkillShortcutModel, { if: (o: PacketModel) => o._shortcutType === ShortcutType.SKILL })
+  _skill?: SkillShortcutModel;
+
+  @NestedModel(OtherShortcutModel, {
+    if: (o: PacketModel) =>
+      [ShortcutType.ACTION, ShortcutType.MACRO, ShortcutType.RECIPE, ShortcutType.BOOKMARK].includes(
+        o._shortcutType
+      ),
+  })
+  _other?: OtherShortcutModel;
+}
 
 export default class ShortCutRegister extends GameClientPacket {
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
-
-    const _shortcutType = this.readD();
-    const _c4Client = this.readD(); // slot + (page * 12)
-
-    switch (_shortcutType) {
-      case ShortcutType.ITEM: {
-        const _itemId = this.readD();
-        const _charType = this.readD();
-        const _sharedReuseGroup = this.readD();
-        const _unk0 = this.readD();
-        const _unk1 = this.readD();
-        const _itemAugmentId = this.readD();
-        break;
-      }
-      case ShortcutType.SKILL: {
-        const _skillId = this.readD();
-        const _skillLevel = this.readD();
-        const _c5 = this.readC();
-        const _charType1 = this.readD();
-        break;
-      }
-      case ShortcutType.ACTION:
-      case ShortcutType.MACRO:
-      case ShortcutType.RECIPE:
-      case ShortcutType.BOOKMARK: {
-        const _uId = this.readD();
-        const _charType2 = this.readD();
-        break;
-      }
-    }
+    const packetData = this.readModel(PacketModel);
 
     return true;
   }

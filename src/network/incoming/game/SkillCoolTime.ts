@@ -1,5 +1,18 @@
-import L2Buff from "../../../entities/L2Buff";
+import { BasePacketModel, C, D, ArrayModel } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
+
+class BuffEntryModel extends BasePacketModel {
+  @D() _skillId: number;
+  @D() _skillLvl: number;
+  @D() _reuse: number;
+  @D() _remaining: number;
+}
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+  @D() _cnt: number;
+  @ArrayModel(BuffEntryModel, "_cnt") _buffs: BuffEntryModel[];
+}
 
 export default class SkillCoolTime extends GameClientPacket {
   BuffsList: {
@@ -8,24 +21,20 @@ export default class SkillCoolTime extends GameClientPacket {
     reuse: number;
     remaining: number;
   }[] = [];
+
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
-    const _cnt = this.readD();
+    const packetData = this.readModel(PacketModel);
 
-    for (let i = 0; i < _cnt; i++) {
-      const _skillId = this.readD();
-      const _skillLvl = this.readD();
-      const _reuse = this.readD();
-      const _remaining = this.readD();
-
+    packetData._buffs.forEach((buff) => {
       this.BuffsList.push({
-        id: _skillId,
-        lvl: _skillLvl,
-        reuse: _reuse,
-        remaining: _remaining
+        id: buff._skillId,
+        lvl: buff._skillLvl,
+        reuse: buff._reuse,
+        remaining: buff._remaining,
       });
-    }
+    });
+
     return true;
   }
 }

@@ -1,4 +1,28 @@
+import { BasePacketModel, C, D, H, Loc, Location, ArrayModel } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
+
+class GroundLocationModel extends BasePacketModel {
+  @Loc() _loc: Location;
+}
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+
+  @D() ActiveCharObjId: number;
+  @D() TargetObjId: number;
+
+  @D() SkillId: number;
+  @D() SkillLevel: number;
+  @D() HitTime: number;
+  @D() ReuseDelay: number;
+  @Loc() _casterLoc: Location;
+
+  @H() _type: number;
+  @H() _groundLocationsCount: number;
+  @ArrayModel(GroundLocationModel, "_groundLocationsCount") _groundLocations: GroundLocationModel[];
+
+  @Loc() _targetLoc: Location;
+}
 
 export default class MagicSkillUse extends GameClientPacket {
   ActiveCharObjId!: number;
@@ -10,28 +34,14 @@ export default class MagicSkillUse extends GameClientPacket {
 
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
+    const packetData = this.readModel(PacketModel);
 
-    this.ActiveCharObjId = this.readD();
-    this.TargetObjId = this.readD();
-
-    this.SkillId = this.readD();
-    this.SkillLevel = this.readD();
-    this.HitTime = this.readD();
-    this.ReuseDelay = this.readD();
-    const [_x, _y, _z] = this.readLoc();
-
-    const _unknown = this.readH();
-    for (let i = 0; i < _unknown; i++) {
-      const _unknownH = this.readH();
-    }
-
-    const _groundLocations = this.readH();
-    for (let i = 0; i < _groundLocations; i++) {
-      const [_xGroundLoc, _yGroundLoc, _zGroundLoc] = this.readLoc();
-    }
-
-    const [_xTarget, _yTarget, _zTarget] = this.readLoc();
+    this.ActiveCharObjId = packetData.ActiveCharObjId;
+    this.TargetObjId = packetData.TargetObjId;
+    this.SkillId = packetData.SkillId;
+    this.SkillLevel = packetData.SkillLevel;
+    this.HitTime = packetData.HitTime;
+    this.ReuseDelay = packetData.ReuseDelay;
 
     return true;
   }

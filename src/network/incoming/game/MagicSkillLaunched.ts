@@ -1,19 +1,23 @@
+import { BasePacketModel, C, D, ArrayModel } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
+
+class TargetIdModel extends BasePacketModel {
+  @D() _targetId: number;
+}
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+  @D() _charObjId: number;
+  @D() _skillId: number;
+  @D() _skillLevel: number;
+  @D() _targetsNum: number;
+  @ArrayModel(TargetIdModel, "_targetsNum") _targets: TargetIdModel[];
+}
 
 export default class MagicSkillLaunched extends GameClientPacket {
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
-
-    const _charObjId = this.readD();
-    const _skillId = this.readD();
-    const _skillLevel = this.readD();
-
-    const _targetsNum = this.readD();
-
-    for (let i = 0; i < _targetsNum; i++) {
-      const _targetId = this.readD();
-    }
+    const packetData = this.readModel(PacketModel);
 
     return true;
   }

@@ -1,21 +1,26 @@
+import { transformIs1 } from "../../../utils";
+import { BasePacketModel, C, D } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+  @D() _staticObjectId: number;
+  @D() _objectId: number;
+  @D() _type: number;
+  @D(transformIs1) _isTargetable: boolean;
+  @D() _meshIndex: number;
+  @D(transformIs1) _isClosed: boolean;
+  @D(transformIs1) _isEnemy: boolean;
+  @D() _currentHp: number;
+  @D() _maxHp: number;
+  @D(transformIs1) _showHp: boolean;
+  @D() _damageGrade: number;
+}
 
 export default class StaticObject extends GameClientPacket {
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
-
-    const _staticObjectId = this.readD();
-    const _objectId = this.readD();
-    const _type = this.readD();
-    const _isTargetable = this.readD() === 1;
-    const _meshIndex = this.readD();
-    const _isClosed = this.readD() === 1;
-    const _isEnemy = this.readD() === 1;
-    const _currentHp = this.readD();
-    const _maxHp = this.readD();
-    const _showHp = this.readD() === 1;
-    const _damageGrade = this.readD();
+    const packetData = this.readModel(PacketModel);
 
     return true;
   }
