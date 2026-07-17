@@ -6,7 +6,7 @@ import { HairColor } from "../../../enums/HairColor";
 import { Face } from "../../../enums/Face";
 import { ClassId } from "../../../enums/ClassId";
 import { BasePacketModel, C, D, F, ScalarArray, H, Loc, Location, S } from "../../GamePacketModel";
-import { transformIs0, transformIs1 } from "../../../utils";
+import { transformIs1 } from "../../../utils";
 
 class PacketModel extends BasePacketModel {
   @C() _id: number;
@@ -32,15 +32,15 @@ class PacketModel extends BasePacketModel {
   @D() Karma: number;
   @D() MAtkSpd: number;
   @D() PAtkSpd: number;
-  @D() _pad0: number;
+  @D() _unkn1: number;
   @D() RunSpeed: number;
   @D() WalkSpeed: number;
   @D() SwimRunSpeed: number;
   @D() SwimWalkSpeed: number;
   @D() FlyRunSpeed: number;
   @D() FlyWalkSpeed: number;
-  @D() _flyRunSpd1: number;
-  @D() _flyWalkSpd1: number;
+  @D() _flyRunSpeed2: number;
+  @D() _flyWalkSpeed2: number;
   @F() SpeedMultiplier: number;
   @F() AtkSpdMultiplier: number;
   @F() _collisionRadius: number;
@@ -51,13 +51,13 @@ class PacketModel extends BasePacketModel {
   @S() Title: string;
   @D() _clanId: number;
   @D() _clanCrestId: number;
-  @D() _clanAllyId: number;
-  @D() _clanAllyCrestId: number;
-  @C(transformIs0) IsSitting: boolean; // standing = 1 sitting = 0
-  @C(transformIs1) IsRunning: boolean; // running = 1 walking = 0
+  @D() _allyId: number;
+  @D() _allyCrestId: number;
+  @C(transformIs1) IsSitting: boolean;
+  @C(transformIs1) IsRunning: boolean;
   @C(transformIs1) IsInCombat: boolean;
-  @C(transformIs1) _deadInOlympiad: boolean;
-  @C(transformIs1) _invisible: boolean;
+  @C(transformIs1) _isAlikeDead: boolean;
+  @C(transformIs1) _isInvisible: boolean;
   @C() _mountType: number; // 1-on Strider, 2-on Wyvern, 3-on Great Wolf, 0-no mount
   @C() _privateStoreType: number;
   @H() _cubicsSize: number;
@@ -65,11 +65,11 @@ class PacketModel extends BasePacketModel {
   _cubics: number[];
   @C() _isInPartyMatchRoom: number;
   @D() _abnormalVisualEffects: number;
-  @C() _isFlyingOrSwimming: number; // 1 - in water, 2 = fly, else 0
+  @C() _movementType: number; // 1 - in water; 2 - in the air; 0 - ground
   @H() RecommHave: number;
   @D() _mountNpcId: number;
   @D() ClassId: number;
-  @D() _pad1: number;
+  @D() _unkn2: number;
   @C() _enchantEffect: number;
   @C() _teamId: number;
   @D() _clanCrestLargeId: number;
@@ -84,11 +84,11 @@ class PacketModel extends BasePacketModel {
   @D() _pledgeClass: number;
   @D() _pledgeType: number;
   @D() _titleColor: number;
-  @D() _cursedWeaponLevel: number;
-  @D() _reputationScore: number;
-  @D() _transformationDisplayId: number;
+  @D() _cursedWeaponEquipped: number;
+  @D() _clanReputationScore: number;
+  @D() _transformationId: number;
   @D() _agathionId: number;
-  @D() _pad3: number;
+  @D() _unkn3: number;
   @D() _abnormalVisualEffectSpecial: number;
 }
 
