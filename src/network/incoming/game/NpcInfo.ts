@@ -1,4 +1,4 @@
-import { transformIs1 } from "../../../utils";
+import { transformIs1, transformIs2 } from "../../../utils";
 import { BasePacketModel, C, D, F, S } from "../../GamePacketModel";
 import AbstractNpcInfo from "./AbstractNpcInfo";
 import L2Npc from "../../../entities/L2Npc";
@@ -43,7 +43,7 @@ class PacketModel extends BasePacketModel {
   @C(transformIs1) IsRunning: boolean;
   @C(transformIs1) IsInCombat: boolean;
   @C(transformIs1) IsDead: boolean;
-  @C({ transform: (value: number) => value === 2 }) _isSummoned: boolean; // invisible ?? 0=false 1=true 2=summoned (only works if model has a summon animation)
+  @C(transformIs2) _isSummoned: boolean; // invisible ?? 0=false 1=true 2=summoned (only works if model has a summon animation)
 
   @D() _unkn2: number;
   @S() _name: string;
