@@ -1,5 +1,6 @@
 import { transformIs1 } from "../utils";
 import { BasePacketModel, D, H, Q } from "./GamePacketModel";
+import L2Item from "../entities/L2Item";
 
 /**
  * Mirrors GameClientPacket.readItem() — shared by every packet that carries a list of items
@@ -34,4 +35,23 @@ export class ItemModel extends BasePacketModel {
   @H() _enchantOption1: number;
   @H() _enchantOption2: number;
   @H() _enchantOption3: number;
+}
+
+export function toL2Item(data: ItemModel): L2Item {
+  const item = new L2Item();
+  item.ObjectId = data.ObjectId;
+  item.Id = data.Id;
+  item.Count = data.Count;
+  item.IsEquipped = data.IsEquipped;
+  item.EnchantLevel = data.EnchantLevel;
+  item.AugmentBonus = data.AugmentBonus;
+  item.AttackElementVal = data.AttackElementVal;
+  item.DefAttFire = data.DefAttFire;
+  item.DefAttWater = data.DefAttWater;
+  item.DefAttWind = data.DefAttWind;
+  item.DefAttEarth = data.DefAttEarth;
+  item.DefAttHolly = data.DefAttHolly;
+  item.DefAttUnholly = data.DefAttUnholly;
+
+  return item;
 }

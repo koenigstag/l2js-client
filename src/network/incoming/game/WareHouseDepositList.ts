@@ -1,4 +1,19 @@
+import { BasePacketModel, C, D, H, Q, ArrayModel, NestedModel } from "../../GamePacketModel";
+import { ItemModel } from "../../GameItemModel";
 import GameClientPacket from "./GameClientPacket";
+
+class DepositEntryModel extends BasePacketModel {
+  @NestedModel(ItemModel) _item: ItemModel;
+  @D() _objId: number;
+}
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+  @H() _whType: number;
+  @Q() _playerAdena: number;
+  @H() _size: number;
+  @ArrayModel(DepositEntryModel, "_size") _entries: DepositEntryModel[];
+}
 
 export default class WareHouseDepositList extends GameClientPacket {
   static readonly PRIVATE: number = 1;
@@ -8,17 +23,7 @@ export default class WareHouseDepositList extends GameClientPacket {
 
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
-
-    const _whType = this.readH();
-    const _playerAdena = this.readQ();
-
-    const _size = this.readH();
-
-    for (let i = 0; i < _size; i++) {
-      const _item = this.readItem();
-      const _objId = this.readD();
-    }
+    const packetData = this.readModel(PacketModel);
 
     return true;
   }

@@ -1,19 +1,26 @@
+import { BasePacketModel, C, D, Q, ArrayModel, NestedModel } from "../../GamePacketModel";
+import { ItemModel } from "../../GameItemModel";
 import GameClientPacket from "./GameClientPacket";
+
+class SellEntryModel extends BasePacketModel {
+  @NestedModel(ItemModel) _item: ItemModel;
+  @Q() _price: number;
+  @Q() _referencePrice: number;
+}
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+  @D() _objId: number;
+  @D() _packageSale: number;
+  @Q() _playerAdena: number;
+  @D() _len: number;
+  @ArrayModel(SellEntryModel, "_len") _entries: SellEntryModel[];
+}
 
 export default class PrivateStoreListSell extends GameClientPacket {
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
-    const _objId = this.readD();
-    const _packageSale = this.readD();
-    const _playerAdena = this.readQ();
-
-    const _len = this.readD();
-    for (let i = 0; i < _len; i++) {
-      const _item = this.readItem();
-      const _price = this.readQ();
-      const _referencePrice = this.readQ();
-    }
+    const packetData = this.readModel(PacketModel);
 
     return true;
   }

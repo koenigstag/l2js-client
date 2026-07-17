@@ -1,25 +1,31 @@
+import { BasePacketModel, C, D, ArrayModel } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
+
+class HennaEntryModel extends BasePacketModel {
+  @D() _dyeId: number;
+  @D() _unk: number;
+}
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+
+  @C() _int: number;
+  @C() _str: number;
+  @C() _con: number;
+  @C() _men: number;
+  @C() _dex: number;
+  @C() _wit: number;
+
+  @D() _slots: number; // 3
+  @D() _hennaEquipListSize: number;
+  @ArrayModel(HennaEntryModel, "_hennaEquipListSize") _hennas: HennaEntryModel[];
+}
 
 export default class HennaInfo extends GameClientPacket {
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
+    const packetData = this.readModel(PacketModel);
 
-    const _int = this.readC();
-    const _str = this.readC();
-    const _con = this.readC();
-    const _men = this.readC();
-    const _dex = this.readC();
-    const _wit = this.readC();
-
-    const _slots = this.readD(); // 3
-
-    const _hennaEquipListSize = this.readD();
-
-    for (let i = 0; i < _hennaEquipListSize; i++) {
-      const _dyeId = this.readD();
-      const _unk = this.readD();
-    }
     return true;
   }
 }

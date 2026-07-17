@@ -1,24 +1,27 @@
+import { BasePacketModel, C, D, Q, ArrayModel } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
+
+class HennaEntryModel extends BasePacketModel {
+  @D() _dyeId: number; // dye Id
+  @D() _dyeItemId: number; // item Id of the dye
+  @Q() _wearCount: number; // amount of dyes required
+  @Q() _wearFee: number; // amount of Adena required
+  @D() _isAllowed: number; // meet the requirement or not
+}
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+  @Q() _adena: number; // activeChar current amount of Adena
+  @D() _slots: number; // available equip slot, almost always 3
+  @D() _hennaEquipListSize: number;
+  @ArrayModel(HennaEntryModel, "_hennaEquipListSize") _hennas: HennaEntryModel[];
+}
 
 export default class HennaEquipList extends GameClientPacket {
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
-    const _adena = this.readQ(); // activeChar current amount of Adena
-    const _slots = this.readD(); // available equip slot, almost always 3
+    const packetData = this.readModel(PacketModel);
 
-    const _hennaEquipListSize = this.readD();
-
-    for (let i = 0; i < _hennaEquipListSize; i++) {
-      // Player must have at least one dye in inventory
-      // to be able to see the Henna that can be applied with it.
-
-      const _dyeId = this.readD(); // dye Id
-      const _dyeItemId = this.readD(); // item Id of the dye
-      const _wearCount = this.readQ(); // amount of dyes required
-      const _wearFee = this.readQ(); // amount of Adena required
-      const _isAllowed = this.readD(); // meet the requirement or not
-    }
     return true;
   }
 }

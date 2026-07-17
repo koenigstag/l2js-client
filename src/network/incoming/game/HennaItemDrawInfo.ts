@@ -1,30 +1,35 @@
+import { BasePacketModel, C, D, Q } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+
+  @D() _dyeId: number; // dye Id
+  @D() _dyeItemId: number; // item Id of the dye
+  @Q() _wearCount: number; // amount of dyes required
+  @Q() _wearFee: number; // amount of Adena required
+  @D() _isAllowed: number; // meet the requirement or not
+
+  @Q() _adena: number;
+
+  @D() _int: number;
+  @C() _equipInt: number;
+  @D() _str: number;
+  @C() _equipStr: number;
+  @D() _con: number;
+  @C() _equipCon: number;
+  @D() _men: number;
+  @C() _equipMen: number;
+  @D() _dex: number;
+  @C() _equipDex: number;
+  @D() _wit: number;
+  @C() _equipWit: number;
+}
 
 export default class HennaItemDrawInfo extends GameClientPacket {
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
-
-    const _dyeId = this.readD(); // dye Id
-    const _dyeItemId = this.readD(); // item Id of the dye
-    const _wearCount = this.readQ(); // amount of dyes required
-    const _wearFee = this.readQ(); // amount of Adena required
-    const _isAllowed = this.readD(); // meet the requirement or not
-
-    const _adena = this.readQ();
-
-    const _int = this.readD();
-    const _equipInt = this.readC();
-    const _str = this.readD();
-    const _equipStr = this.readC();
-    const _con = this.readD();
-    const _equipCon = this.readC();
-    const _men = this.readD();
-    const _equipMen = this.readC();
-    const _dex = this.readD();
-    const _equipDex = this.readC();
-    const _wit = this.readD();
-    const _equipWit = this.readC();
+    const packetData = this.readModel(PacketModel);
 
     return true;
   }

@@ -1,6 +1,6 @@
 import L2Item from "../../../entities/L2Item";
 import ReceivablePacket from "../../../mmocore/ReceivablePacket";
-import { ItemModel } from "../../GameItemModel";
+import { ItemModel, toL2Item } from "../../GameItemModel";
 
 export default abstract class GameClientPacket extends ReceivablePacket {
   // @Override
@@ -14,24 +14,7 @@ export default abstract class GameClientPacket extends ReceivablePacket {
   }
 
   readItem(): L2Item {
-    const data = this.readModel(ItemModel);
-
-    const item = new L2Item();
-    item.ObjectId = data.ObjectId;
-    item.Id = data.Id;
-    item.Count = data.Count;
-    item.IsEquipped = data.IsEquipped;
-    item.EnchantLevel = data.EnchantLevel;
-    item.AugmentBonus = data.AugmentBonus;
-    item.AttackElementVal = data.AttackElementVal;
-    item.DefAttFire = data.DefAttFire;
-    item.DefAttWater = data.DefAttWater;
-    item.DefAttWind = data.DefAttWind;
-    item.DefAttEarth = data.DefAttEarth;
-    item.DefAttHolly = data.DefAttHolly;
-    item.DefAttUnholly = data.DefAttUnholly;
-
-    return item;
+    return toL2Item(this.readModel(ItemModel));
   }
 
   abstract readImpl(): boolean;
