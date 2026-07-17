@@ -1,34 +1,40 @@
+import { BasePacketModel, C, D, ArrayModel } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
+
+class ClassTemplateModel extends BasePacketModel {
+  @D() _race: number;
+  @D() _class: number;
+  @D() _baseStr: number;
+  @D() _unknown: number;
+  @D() _baseDex: number;
+  @D() _unknown2: number;
+  @D() _unknown3: number;
+  @D() _baseCon: number;
+  @D() _unknown4: number;
+  @D() _unknown5: number;
+  @D() _baseInt: number;
+  @D() _unknown6: number;
+  @D() _unknown7: number;
+  @D() _baseWit: number;
+  @D() _unknown8: number;
+  @D() _unknown9: number;
+  @D() _baseMen: number;
+  @D() _unknown10: number;
+}
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+  @D() _size: number;
+  @ArrayModel(ClassTemplateModel, "_size") _templates: ClassTemplateModel[];
+}
 
 export default class NewCharacterSuccess extends GameClientPacket {
   CreatureObjId!: number;
 
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
+    const packetData = this.readModel(PacketModel);
 
-    const _size = this.readD();
-
-    for (let i = 0; i < _size; i++) {
-      const _race = this.readD()
-      const _class = this.readD()
-      const _baseStr = this.readD()
-      const _unknown = this.readD()
-      const _baseDex = this.readD()
-      const _unknown2 = this.readD()
-      const _unknown3 = this.readD()
-      const _baseCon = this.readD()
-      const _unknown4 = this.readD()
-      const _unknown5 = this.readD()
-      const _baseInt = this.readD()
-      const _unknown6 = this.readD()
-      const _unknown7 = this.readD()
-      const _baseWit = this.readD()
-      const _unknown8 = this.readD()
-      const _unknown9 = this.readD()
-      const _baseMen = this.readD()
-      const _unknown10 = this.readD()
-    }
     return true;
   }
 }

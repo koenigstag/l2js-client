@@ -1,21 +1,25 @@
+import { BasePacketModel, C, D } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
 
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+  @D() _objId: number;
+  @D() _force: number;
+  @D() _angle1: number;
+  @D() _angle2: number;
+  @D() _time: number;
+  @D() _duration: number;
+  @D() _relYaw: number;
+  @D() _relPitch: number;
+  @D() _isWide: number;
+  @D() _relAngle: number;
+  @D() _unk: number;
+}
+
 export default class SpecialCamera extends GameClientPacket {
-  private _skyState!: number;
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
-    const _objId = this.readD();
-    const _force = this.readD();
-    const _angle1 = this.readD();
-    const _angle2 = this.readD();
-    const _time = this.readD();
-    const _duration = this.readD();
-    const _relYaw = this.readD();
-    const _relPitch = this.readD();
-    const _isWide = this.readD();
-    const _relAngle = this.readD();
-    const _unk = this.readD();
+    const packetData = this.readModel(PacketModel);
 
     return true;
   }
