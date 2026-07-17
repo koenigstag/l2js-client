@@ -1,4 +1,13 @@
+import { BasePacketModel, C, D, H, S } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+  @H() _sub: number;
+  @D() NpcObjectId: number;
+  @S() Html: string;
+  @D() QuestId: number;
+}
 
 export default class NpcQuestHtmlMessage extends GameClientPacket {
   NpcObjectId: number = 0;
@@ -7,12 +16,11 @@ export default class NpcQuestHtmlMessage extends GameClientPacket {
 
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
-    const _sub = this.readH();
+    const packetData = this.readModel(PacketModel);
 
-    this.NpcObjectId = this.readD();
-    this.Html = this.readS();
-    this.QuestId = this.readD();
+    this.NpcObjectId = packetData.NpcObjectId;
+    this.Html = packetData.Html;
+    this.QuestId = packetData.QuestId;
 
     return true;
   }
