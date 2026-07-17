@@ -75,7 +75,7 @@ export default abstract class ReceivablePacket extends AbstractPacket implements
 
     for (const field of instance.getSchema()) {
       if (field.kind === "scalar" && (!field.condition || field.condition(target))) {
-        const value = this.readByType(field.type);
+        const value = this.readByType(field.type, field.length);
         target[field.key] = field.transform ? field.transform(value) : value;
         continue;
       }
@@ -99,7 +99,7 @@ export default abstract class ReceivablePacket extends AbstractPacket implements
     return instance;
   }
 
-  private readByType(type: FieldType): unknown {
+  private readByType(type: FieldType, length?: number): unknown {
     switch (type) {
       case "C":
         return this.readC();
@@ -115,6 +115,8 @@ export default abstract class ReceivablePacket extends AbstractPacket implements
         return this.readS();
       case "Loc":
         return this.readLoc();
+      case "B":
+        return this.readB(length as number);
     }
   }
 }

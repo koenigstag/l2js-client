@@ -1,4 +1,4 @@
-export type FieldType = "C" | "H" | "D" | "Q" | "F" | "S" | "Loc";
+export type FieldType = "C" | "H" | "D" | "Q" | "F" | "S" | "Loc" | "B";
 
 export type Location = [x: number, y: number, z: number];
 
@@ -10,6 +10,7 @@ export interface BinaryReader {
   readQ(): number;
   readF(): number;
   readS(): string;
+  readB(length: number): Uint8Array;
   readLoc(): Location;
 }
 
@@ -33,7 +34,7 @@ type FieldTransform = (value: any) => any;
  * of a previously read scalar field (countKey).
  */
 export type FieldSpec =
-  | { key: string; order: number; kind: "scalar"; type: FieldType; condition?: FieldCondition; transform?: FieldTransform; }
+  | { key: string; order: number; kind: "scalar"; type: FieldType; length?: number; condition?: FieldCondition; transform?: FieldTransform; }
   | { key: string; order: number; kind: "nested"; model: new () => IPacketModel; condition?: FieldCondition; transform?: FieldTransform; }
   | {
       key: string;
@@ -123,6 +124,32 @@ export function Field(
 
 
     fields.push({ key: propertyKey as string, kind: "scalar", type, order: resolvedOrder, condition, transform });
+    setOwnFields(target, fields);
+  };
+}
+
+/**
+ * Marks field as a fixed-length raw byte array, read via `readB(length)`.
+ *
+ * @param length number of bytes to read.
+ *
+ * @example
+ * ```ts
+ *   class PacketModel extends BasePacketModel {
+ *     @C() _id: number;
+ *     @B(8) key: Uint8Array;
+ *   }
+ * ```
+ */
+export function B(length: number, { order, if: condition, transform }: FieldDecoratorOptions = {}): PropertyDecorator {
+  return (target, propertyKey) => {
+    const fields = getOwnFields(target);
+    const inherited = collectFields(Object.getPrototypeOf(target)).length;
+    const resolvedOrder = order ?? inherited + fields.length;
+
+    validateOrderUniqueness(target, fields, resolvedOrder, propertyKey);
+
+    fields.push({ key: propertyKey as string, kind: "scalar", type: "B", length, order: resolvedOrder, condition, transform });
     setOwnFields(target, fields);
   };
 }
