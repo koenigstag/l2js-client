@@ -1,20 +1,24 @@
+import { BasePacketModel, C, D, H } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+  @H() _sub: number;
+  @D() _inventory: number;
+  @D() _warehouse: number;
+  @D() _clan: number;
+  @D() _privateSell: number;
+  @D() _privateBuy: number;
+  @D() _receipeD: number;
+  @D() _recipe: number;
+  @D() _inventoryExtraSlots: number;
+  @D() _inventoryQuestItems: number;
+}
 
 export default class ExStorageMaxCount extends GameClientPacket {
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
-    const _sub = this.readH();
-
-    const _inventory = this.readD();
-    const _warehouse = this.readD();
-    const _clan = this.readD();
-    const _privateSell = this.readD();
-    const _privateBuy = this.readD();
-    const _receipeD = this.readD();
-    const _recipe = this.readD();
-    const _inventoryExtraSlots = this.readD();
-    const _inventoryQuestItems = this.readD();
+    const packetData = this.readModel(PacketModel);
 
     return true;
   }

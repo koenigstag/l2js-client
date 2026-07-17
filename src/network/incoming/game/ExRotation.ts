@@ -1,4 +1,12 @@
+import { BasePacketModel, C, D, H } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+  @H() _sub: number;
+  @D() CharObjectId: number;
+  @D() Heading: number;
+}
 
 export default class ExRotation extends GameClientPacket {
   CharObjectId!: number;
@@ -6,11 +14,10 @@ export default class ExRotation extends GameClientPacket {
 
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
-    const _sub = this.readH();
+    const packetData = this.readModel(PacketModel);
 
-    this.CharObjectId = this.readD();
-    this.Heading = this.readD();
+    this.CharObjectId = packetData.CharObjectId;
+    this.Heading = packetData.Heading;
 
     return true;
   }

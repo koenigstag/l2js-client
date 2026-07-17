@@ -1,15 +1,21 @@
+import { BasePacketModel, C, D, H, S, ArrayModel } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
+
+class ContactNameModel extends BasePacketModel {
+  @S() _name: string;
+}
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+  @H() _sub: number;
+  @D() _contacts: number;
+  @ArrayModel(ContactNameModel, "_contacts") _names: ContactNameModel[];
+}
 
 export default class ExShowContactList extends GameClientPacket {
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
-    const _sub = this.readH();
-
-    const _contacts = this.readD();
-    for (let i = 0; i < _contacts; i++) {
-      const _name = this.readS();
-    }
+    const packetData = this.readModel(PacketModel);
 
     return true;
   }

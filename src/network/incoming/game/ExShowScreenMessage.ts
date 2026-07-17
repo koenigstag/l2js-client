@@ -1,27 +1,29 @@
+import { BasePacketModel, C, D, H, S } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+  @H() _sub: number;
+  @D() _type: number;
+  @D() _sysMessageId: number;
+  @D() _position: number;
+  @D() _unk1: number;
+  @D() _size: number;
+  @D() _unk2: number;
+  @D() _unk3: number;
+  @D() _effect: number;
+  @D() _time: number;
+  @D() _fade: number;
+  @D() _npcString: number;
+
+  @S({ if: (o: PacketModel) => o._npcString === -1 }) _text?: string;
+  @S({ if: (o: PacketModel) => o._npcString !== -1 }) _param1?: string;
+}
 
 export default class ExShowScreenMessage extends GameClientPacket {
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
-    const _sub = this.readH();
-
-    const _type = this.readD();
-    const _sysMessageId = this.readD();
-    const _position = this.readD();
-    const _unk1 = this.readD();
-    const _size = this.readD();
-    const _unk2 = this.readD();
-    const _unk3 = this.readD();
-    const _effect = this.readD();
-    const _time = this.readD();
-    const _fade = this.readD();
-    const _npcString = this.readD();
-    if (_npcString === -1) {
-      const _text = this.readS();
-    } else {
-      const _param1 = this.readS();
-    }
+    const packetData = this.readModel(PacketModel);
 
     return true;
   }
