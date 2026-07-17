@@ -1,6 +1,7 @@
 import IStream from "../mmocore/IStream";
 import MMOConfig from "../mmocore/MMOConfig";
-import NetSocket from "./adapters/NetSocket";
+import NetSocket from "./adapters/NetSocket.adapter";
+import WebSocketAdapter from "./adapters/WebSocket.adapter";
 
 export default class SocketFactory {
   static getSocketAdapter(config: MMOConfig): IStream {
@@ -20,6 +21,8 @@ export default class SocketFactory {
           // return new FireFox();
         }
         break;
+      case 'websocket':
+        return new WebSocketAdapter( `ws://${config.Ip}:${config.Port}` )
     }
 
     throw new Error("Cannot find appropriate socket adapter");
