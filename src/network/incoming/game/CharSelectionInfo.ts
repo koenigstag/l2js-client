@@ -3,13 +3,9 @@ import L2User from "../../../entities/L2User";
 import { ClassId } from "../../../enums/ClassId";
 import { Race } from "../../../enums/Race";
 import { Sex } from "../../../enums/Sex";
-import { ArrayModel, BasePacketModel, C, D, F, Q, S } from "../../GamePacketModel";
+import { ArrayModel, ScalarArray, BasePacketModel, C, D, F, Q, S } from "../../GamePacketModel";
 import GameServerPacket from "../../outgoing/game/GameServerPacket";
 import GameClientPacket from "./GameClientPacket";
-
-class PaperdollModel extends BasePacketModel {
-  @D() _unknD: number;
-}
 
 class UserModel extends BasePacketModel {
   @S() Name: string;
@@ -42,7 +38,7 @@ class UserModel extends BasePacketModel {
   @D() _unknD6: number;
   @D() _unknD7: number;
   _paperdollOrder = GameServerPacket.PAPERDOLL_ORDER;
-  @ArrayModel(PaperdollModel, "_paperdollOrder") _paperdoll: PaperdollModel[];
+  @ScalarArray("D", "_paperdollOrder") _paperdoll: number[];
   @D() HairStyle: number;
   @D() HairColor: number;
   @D() Face: number;

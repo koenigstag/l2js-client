@@ -1,9 +1,5 @@
-import { BasePacketModel, C, D, H, ArrayModel } from "../../GamePacketModel";
+import { BasePacketModel, C, D, H, ArrayModel, ScalarArray } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
-
-class CategoryByteModel extends BasePacketModel {
-  @C() _cmd: number;
-}
 
 class ActionKeyModel extends BasePacketModel {
   @D() _cmdId: number;
@@ -15,10 +11,10 @@ class ActionKeyModel extends BasePacketModel {
 
 class UIKeyEntryModel extends BasePacketModel {
   @C() _catElList1: number;
-  @ArrayModel(CategoryByteModel, "_catElList1") _cat1: CategoryByteModel[];
+  @ScalarArray("C", "_catElList1") _cat1: number[];
 
   @C() _catElList2: number;
-  @ArrayModel(CategoryByteModel, "_catElList2") _cat2: CategoryByteModel[];
+  @ScalarArray("C", "_catElList2") _cat2: number[];
 
   @D() _keyElList: number;
   @ArrayModel(ActionKeyModel, "_keyElList") _keys: ActionKeyModel[];

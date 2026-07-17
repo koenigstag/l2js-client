@@ -1,15 +1,11 @@
-import { BasePacketModel, C, D, H, S, ArrayModel } from "../../GamePacketModel";
+import { BasePacketModel, C, D, H, ScalarArray } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
-
-class ContactNameModel extends BasePacketModel {
-  @S() _name: string;
-}
 
 class PacketModel extends BasePacketModel {
   @C() _id: number;
   @H() _sub: number;
   @D() _contacts: number;
-  @ArrayModel(ContactNameModel, "_contacts") _names: ContactNameModel[];
+  @ScalarArray("S", "_contacts") _names: string[];
 }
 
 export default class ExShowContactList extends GameClientPacket {

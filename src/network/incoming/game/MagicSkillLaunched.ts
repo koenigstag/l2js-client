@@ -1,9 +1,5 @@
-import { BasePacketModel, C, D, ArrayModel } from "../../GamePacketModel";
+import { BasePacketModel, C, D, ScalarArray } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
-
-class TargetIdModel extends BasePacketModel {
-  @D() _targetId: number;
-}
 
 class PacketModel extends BasePacketModel {
   @C() _id: number;
@@ -11,7 +7,7 @@ class PacketModel extends BasePacketModel {
   @D() _skillId: number;
   @D() _skillLevel: number;
   @D() _targetsNum: number;
-  @ArrayModel(TargetIdModel, "_targetsNum") _targets: TargetIdModel[];
+  @ScalarArray("D", "_targetsNum") _targets: number[];
 }
 
 export default class MagicSkillLaunched extends GameClientPacket {

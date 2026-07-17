@@ -80,14 +80,32 @@ export default abstract class ReceivablePacket extends AbstractPacket implements
         continue;
       }
 
-      if (field.kind === "nested" && (!field.condition || field.condition(target))) {
+      if ( field.kind === 'scalarArray' && ( !field.condition || field.condition( target ) ) ) {
+        const countValue = target[ field.countKey ] as number
+        const count = Array.isArray( countValue ) ? countValue.length : countValue
+        if ( count === undefined || count === null ) {
+          throw new Error( `Cannot read field ${field.key} - countKey ${field.countKey} is undefined or null` )
+        }
+        const items: Array<unknown> = []
+        for ( let i = 0; i < count; i++ ) {
+          items.push( this.readByType( field.type, field.length ) )
+        }
+        target[ field.key ] = field.transform ? field.transform( items ) : items
+        continue
+      }
+
+      if (field.kind === "nestedModel" && (!field.condition || field.condition(target))) {
         const nestedInstance = this.readModel(field.model);
         target[field.key] = field.transform ? field.transform(nestedInstance) : nestedInstance;
         continue;
       }
 
-      if (field.kind === "array" && (!field.condition || field.condition(target))) {
-        const count = target[field.countKey] as number;
+      if (field.kind === "modelArray" && (!field.condition || field.condition(target))) {
+        const countValue = target[ field.countKey ] as number
+        const count = Array.isArray( countValue ) ? countValue.length : countValue
+        if ( count === undefined || count === null ) {
+          throw new Error( `Cannot read field ${field.key} - countKey ${field.countKey} is undefined or null` )
+        }
         const items: IPacketModel[] = [];
         for (let i = 0; i < count; i++) {
           items.push(this.readModel(field.model));

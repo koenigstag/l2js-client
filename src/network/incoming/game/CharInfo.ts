@@ -5,20 +5,8 @@ import { HairStyle } from "../../../enums/HairStyle";
 import { HairColor } from "../../../enums/HairColor";
 import { Face } from "../../../enums/Face";
 import { ClassId } from "../../../enums/ClassId";
-import { BasePacketModel, C, D, F, ArrayModel, H, Loc, Location, S } from "../../GamePacketModel";
+import { BasePacketModel, C, D, F, ScalarArray, H, Loc, Location, S } from "../../GamePacketModel";
 import { transformIs0, transformIs1 } from "../../../utils";
-
-class PaperdollDisplayModel extends BasePacketModel {
-  @D() _slotItemDisplayId: number;
-}
-
-class PaperdollAugmentationModel extends BasePacketModel {
-  @D() _slotItemAugmentationId: number;
-}
-
-class CubicModel extends BasePacketModel {
-  @H() _cubicId: number;
-}
 
 class PacketModel extends BasePacketModel {
   @C() _id: number;
@@ -32,11 +20,11 @@ class PacketModel extends BasePacketModel {
 
   _paperdollOrder = CharInfo.PAPERDOLL_ORDER;
 
-  @ArrayModel(PaperdollDisplayModel, "_paperdollOrder")
-  _paperdoll: PaperdollDisplayModel[];
+  @ScalarArray("D", "_paperdollOrder")
+  _paperdoll: number[];
 
-  @ArrayModel(PaperdollAugmentationModel, "_paperdollOrder")
-  _paperdollAugmentation: PaperdollAugmentationModel[];
+  @ScalarArray("D", "_paperdollOrder")
+  _paperdollAugmentation: number[];
 
   @D() _talismanSlots: number;
   @D(transformIs1) _canEquipCloak: boolean;
@@ -73,8 +61,8 @@ class PacketModel extends BasePacketModel {
   @C() _mountType: number; // 1-on Strider, 2-on Wyvern, 3-on Great Wolf, 0-no mount
   @C() _privateStoreType: number;
   @H() _cubicsSize: number;
-  @ArrayModel(CubicModel, "_cubicsSize")
-  _cubics: CubicModel[];
+  @ScalarArray("H", "_cubicsSize")
+  _cubics: number[];
   @C() _isInPartyMatchRoom: number;
   @D() _abnormalVisualEffects: number;
   @C() _isFlyingOrSwimming: number; // 1 - in water, 2 = fly, else 0

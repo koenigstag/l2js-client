@@ -33,13 +33,38 @@ type FieldTransform = (value: any) => any;
  * Array field — N instances of a nested PacketModel consecutively, where N is the value
  * of a previously read scalar field (countKey).
  */
-export type FieldSpec =
-  | { key: string; order: number; kind: "scalar"; type: FieldType; length?: number; condition?: FieldCondition; transform?: FieldTransform; }
-  | { key: string; order: number; kind: "nested"; model: new () => IPacketModel; condition?: FieldCondition; transform?: FieldTransform; }
+export type FieldSpec<T = FieldType> =
   | {
       key: string;
       order: number;
-      kind: "array";
+      kind: 'scalar';
+      type: T;
+      length?: number;
+      condition?: FieldCondition;
+      transform?: FieldTransform;
+    }
+  | {
+      key: string;
+      order: number;
+      kind: 'scalarArray';
+      type: T;
+      length?: number;
+      countKey: string;
+      condition?: FieldCondition;
+      transform?: FieldTransform;
+    }
+  | {
+      key: string;
+      order: number;
+      kind: 'nestedModel';
+      model: new () => IPacketModel;
+      condition?: FieldCondition;
+      transform?: FieldTransform;
+    }
+  | {
+      key: string;
+      order: number;
+      kind: 'modelArray';
       model: new () => IPacketModel;
       countKey: string;
       condition?: FieldCondition;
@@ -205,7 +230,7 @@ export function ArrayModel<M extends IPacketModel>(
 
     fields.push({
       key: propertyKey as string,
-      kind: "array",
+      kind: "modelArray",
       model: Model,
       countKey,
       order: resolvedOrder,
@@ -214,6 +239,55 @@ export function ArrayModel<M extends IPacketModel>(
     });
     setOwnFields(target, fields);
   };
+}
+
+/**
+ * Repeated scalar field — N raw values (read/written via one of the read/write methods),
+ * where N is taken from the value of a previously read scalar field of the same model.
+ *
+ * Use this instead of ArrayModel when array elements are plain values rather than nested
+ * structures — it writes/reads values directly instead of allocating a wrapper model
+ * instance per element.
+ *
+ * Note: unlike ArrayModel, transform (if provided) runs once on the whole array, not per element —
+ * there is no per-element model instance here to transform individually.
+ *
+ * @param type The type of each element (corresponds to the read/write methods).
+ * @param countKey The name of the field in the same model that contains the count of items to read.
+ * @param options Options for the field decorator.
+ *
+ * @example
+ * ```ts
+ *   class PacketModel extends BasePacketModel {
+ *     @C() _id: number;
+ *     @H() _size: number;
+ *     @ScalarArray('D', '_size') itemIds: Array<number>;
+ *   }
+ * ```
+ */
+export function ScalarArray<T extends FieldType = FieldType>(
+  type: T,
+  countKey: string,
+  { order, if: condition, transform }: FieldDecoratorOptions = {}
+): PropertyDecorator {
+  return ( target, propertyKey ) => {
+    const fields = getOwnFields( target )
+    const inherited = collectFields( Object.getPrototypeOf( target ) ).length
+    const resolvedOrder = order ?? inherited + fields.length
+
+    validateOrderUniqueness( target, fields, resolvedOrder, propertyKey )
+
+    fields.push( {
+      key: propertyKey as string,
+      kind: 'scalarArray',
+      type,
+      countKey,
+      order: resolvedOrder,
+      condition,
+      transform,
+    } )
+    setOwnFields( target, fields )
+  }
 }
 
 /**
@@ -251,7 +325,7 @@ export function NestedModel<M extends IPacketModel>(
 
     fields.push({
       key: propertyKey as string,
-      kind: "nested",
+      kind: "nestedModel",
       model: Model,
       order: resolvedOrder,
       condition,

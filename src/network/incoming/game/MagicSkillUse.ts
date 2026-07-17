@@ -1,9 +1,5 @@
-import { BasePacketModel, C, D, H, Loc, Location, ArrayModel } from "../../GamePacketModel";
+import { BasePacketModel, C, D, H, Loc, Location, ScalarArray } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
-
-class GroundLocationModel extends BasePacketModel {
-  @Loc() _loc: Location;
-}
 
 class PacketModel extends BasePacketModel {
   @C() _id: number;
@@ -19,7 +15,7 @@ class PacketModel extends BasePacketModel {
 
   @H() _type: number;
   @H() _groundLocationsCount: number;
-  @ArrayModel(GroundLocationModel, "_groundLocationsCount") _groundLocations: GroundLocationModel[];
+  @ScalarArray("Loc", "_groundLocationsCount") _groundLocations: Location[];
 
   @Loc() _targetLoc: Location;
 }
