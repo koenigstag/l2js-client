@@ -1,4 +1,11 @@
+import { BasePacketModel, C, D, H } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+  @H() _sub: number;
+  @D() _zoneType: number;
+}
 
 export default class ExSetCompassZoneCode extends GameClientPacket {
   static readonly ALTEREDZONE: number = 0x08;
@@ -11,10 +18,7 @@ export default class ExSetCompassZoneCode extends GameClientPacket {
 
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
-    const _sub = this.readH();
-
-    const _zoneType = this.readD();
+    const packetData = this.readModel(PacketModel);
 
     return true;
   }
