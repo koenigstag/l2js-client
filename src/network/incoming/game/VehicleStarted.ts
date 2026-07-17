@@ -1,12 +1,16 @@
+import { BasePacketModel, C, D } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+  @D() _objId: number;
+  @D() _state: number;
+}
 
 export default class VehicleStarted extends GameClientPacket {
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
-
-    const _objId = this.readD();
-    const _state = this.readD();
+    const packetData = this.readModel(PacketModel);
 
     return true;
   }

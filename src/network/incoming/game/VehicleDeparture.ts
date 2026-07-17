@@ -1,14 +1,18 @@
+import { BasePacketModel, C, D, Loc, Location } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+  @D() _objId: number;
+  @D() _moveSpeed: number;
+  @D() _rotationSpeed: number;
+  @Loc() _location: Location;
+}
 
 export default class VehicleDeparture extends GameClientPacket {
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
-
-    const _objId = this.readD();
-    const _moveSpeed = this.readD();
-    const _rotationSpeed = this.readD();
-    const [_x, _y, _z] = this.readLoc();
+    const packetData = this.readModel(PacketModel);
 
     return true;
   }

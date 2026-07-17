@@ -1,4 +1,15 @@
+import { BasePacketModel, C, D, S } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+  @D() _convoId: number;
+  @S() _name: string;
+  @D() _unkn1: number;
+  @D() _type: number;
+  @S() _speaker: string;
+  @S() _msg: string;
+}
 
 export default class Snoop extends GameClientPacket {
   private _convoId = 0;
@@ -9,14 +20,13 @@ export default class Snoop extends GameClientPacket {
 
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
-    this._convoId = this.readD();
-    this._name = this.readS();
-    const _unkn1 = this.readD();
+    const packetData = this.readModel(PacketModel);
 
-    this._type = this.readD();
-    this._speaker = this.readS();
-    this._msg = this.readS();
+    this._convoId = packetData._convoId;
+    this._name = packetData._name;
+    this._type = packetData._type;
+    this._speaker = packetData._speaker;
+    this._msg = packetData._msg;
 
     return true;
   }

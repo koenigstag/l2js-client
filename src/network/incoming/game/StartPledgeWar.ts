@@ -1,11 +1,16 @@
+import { BasePacketModel, C, S } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+  @S() _playerName: string;
+  @S() _pledgeName: string;
+}
 
 export default class StartPledgeWar extends GameClientPacket {
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
-    const _playerName = this.readS();
-    const _pledgeName = this.readS();
+    const packetData = this.readModel(PacketModel);
 
     return true;
   }

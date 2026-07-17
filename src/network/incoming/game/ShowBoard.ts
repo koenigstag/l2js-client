@@ -1,22 +1,26 @@
+import { BasePacketModel, C, S } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+  @C() _showComm: number; // c4 1 to show community 00 to hide
+
+  @S() _bbshome: string;
+  @S() _bbsgetfav: string;
+  @S() _bbsloc: string;
+  @S() _bbsclan: string;
+  @S() _bbsmemo: string;
+  @S() _bbsmail: string;
+  @S() _bbsfriends: string;
+  @S() _bbsAddFav: string;
+
+  @S() _content: string;
+}
 
 export default class ShowBoard extends GameClientPacket {
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
-
-    const _showComm = this.readC(); // c4 1 to show community 00 to hide
-
-    const _bbshome = this.readS();
-    const _bbsgetfav = this.readS();
-    const _bbsloc = this.readS();
-    const _bbsclan = this.readS();
-    const _bbsmemo = this.readS();
-    const _bbsmail = this.readS();
-    const _bbsfriends = this.readS();
-    const _bbsAddFav = this.readS();
-
-    const _content = this.readS();
+    const packetData = this.readModel(PacketModel);
 
     return true;
   }
