@@ -1,4 +1,12 @@
+import { BasePacketModel, C, D, Loc, Location } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+  @D() ObjectId: number;
+  @Loc() Location: Location;
+  @D() Heading: number;
+}
 
 export default class ValidateLocation extends GameClientPacket {
   ObjectId!: number;
@@ -7,10 +15,11 @@ export default class ValidateLocation extends GameClientPacket {
 
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
-    this.ObjectId = this.readD();
-    this.Location = this.readLoc();
-    this.Heading = this.readD();
+    const packetData = this.readModel(PacketModel);
+
+    this.ObjectId = packetData.ObjectId;
+    this.Location = packetData.Location;
+    this.Heading = packetData.Heading;
 
     return true;
   }

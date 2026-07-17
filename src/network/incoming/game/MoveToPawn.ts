@@ -1,4 +1,14 @@
+import { BasePacketModel, C, D, Loc, Location } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+  @D() CharObjId: number;
+  @D() TargetObjId: number;
+  @D() Distance: number;
+  @Loc() Location: Location;
+  @Loc() Destination: Location;
+}
 
 export default class MoveToPawn extends GameClientPacket {
   CharObjId!: number;
@@ -9,13 +19,13 @@ export default class MoveToPawn extends GameClientPacket {
 
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
-    this.CharObjId = this.readD();
-    this.TargetObjId = this.readD();
-    this.Distance = this.readD();
+    const packetData = this.readModel(PacketModel);
 
-    this.Location = this.readLoc();
-    this.Destination = this.readLoc();
+    this.CharObjId = packetData.CharObjId;
+    this.TargetObjId = packetData.TargetObjId;
+    this.Distance = packetData.Distance;
+    this.Location = packetData.Location;
+    this.Destination = packetData.Destination;
 
     return true;
   }

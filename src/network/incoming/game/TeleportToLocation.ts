@@ -1,16 +1,26 @@
+import { BasePacketModel, C, D, Loc, Location } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+  @D() ObjectId: number;
+  @Loc() Location: Location;
+  @D() _unkn1: number;
+  @D() Heading: number;
+}
 
 export default class TeleportToLocation extends GameClientPacket {
   ObjectId!: number;
   Heading!: number;
   Location!: number[];
+
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
-    this.ObjectId = this.readD();
-    this.Location = this.readLoc();
-    const _unkn1 = this.readD();
-    this.Heading = this.readD();
+    const packetData = this.readModel(PacketModel);
+
+    this.ObjectId = packetData.ObjectId;
+    this.Location = packetData.Location;
+    this.Heading = packetData.Heading;
 
     return true;
   }
