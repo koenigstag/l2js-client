@@ -1,4 +1,21 @@
+import { transformIs1 } from "../../../utils";
+import { BasePacketModel, C, D } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+  @D() CharObjId: number;
+  @D(transformIs1) _canTeleport: boolean;
+
+  @D() _hideOutId: number;
+  @D() _toCastle: number;
+  @D() _toSiegeHQ: number;
+
+  @D(transformIs1) Sweepable: boolean; // blue glow
+  @D(transformIs1) _staticRes: boolean; // to Fixed
+
+  @D() _toFortress: number;
+}
 
 export default class Die extends GameClientPacket {
   CharObjId!: number;
@@ -6,19 +23,10 @@ export default class Die extends GameClientPacket {
 
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
+    const packetData = this.readModel(PacketModel);
 
-    this.CharObjId = this.readD();
-    const _canTeleport = this.readD() === 1;
-
-    const _hideOutId = this.readD();
-    const _toCastle = this.readD();
-    const _toSiegeHQ = this.readD();
-
-    this.Sweepable = this.readD() === 1; // blue glow
-    const _staticRes = this.readD() === 1; // to Fixed
-
-    const _toFortress = this.readD();
+    this.CharObjId = packetData.CharObjId;
+    this.Sweepable = packetData.Sweepable;
 
     return true;
   }

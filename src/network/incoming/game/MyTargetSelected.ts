@@ -1,15 +1,21 @@
+import { BasePacketModel, C, D, H } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+  @D() CreatureObjId: number;
+  @H() _color: number;
+  @D() _pad: number;
+}
 
 export default class MyTargetSelected extends GameClientPacket {
   CreatureObjId!: number;
 
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
-    this.CreatureObjId = this.readD();
-    const _color = this.readH();
+    const packetData = this.readModel(PacketModel);
 
-    const _pad = this.readD();
+    this.CreatureObjId = packetData.CreatureObjId;
 
     return true;
   }

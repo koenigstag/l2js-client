@@ -7,7 +7,7 @@ class PacketModel extends BasePacketModel {
 }
 
 export default class CharCreateOk extends GameClientPacket {
-  result!: number;
+  result: number;
 
   // @Override
   readImpl(): boolean {
