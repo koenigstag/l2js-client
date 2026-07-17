@@ -1,4 +1,17 @@
+import { BasePacketModel, C, D, ArrayModel } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
+
+class StatEntryModel extends BasePacketModel {
+  @D() _status: number;
+  @D() _value: number;
+}
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+  @D() ObjectId: number;
+  @D() _attributeSize: number;
+  @ArrayModel(StatEntryModel, "_attributeSize") _attributes: StatEntryModel[];
+}
 
 export default class StatusUpdate extends GameClientPacket {
   static readonly LEVEL: number = 0x01;
@@ -40,16 +53,13 @@ export default class StatusUpdate extends GameClientPacket {
 
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
-    this.ObjectId = this.readD();
+    const packetData = this.readModel(PacketModel);
 
-    const _attributeSize = this.readD();
+    this.ObjectId = packetData.ObjectId;
 
-    for (let i = 0; i < _attributeSize; i++) {
-      const status = this.readD();
-      const value = this.readD();
-      this.Stats[status] = value;
-    }
+    packetData._attributes.forEach((entry) => {
+      this.Stats[entry._status] = entry._value;
+    });
 
     return true;
   }

@@ -1,7 +1,80 @@
+import { transformIs1 } from "../../../utils";
+import { BasePacketModel, C, D, F, S } from "../../GamePacketModel";
 import AbstractNpcInfo from "./AbstractNpcInfo";
 import L2Npc from "../../../entities/L2Npc";
 import L2Mob from "../../../entities/L2Mob";
 import L2Creature from "../../../entities/L2Creature";
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+  @D() ObjectId: number;
+  @D() _idTemplate: number;
+  @D(transformIs1) IsAttackable: boolean;
+
+  @D() X: number;
+  @D() Y: number;
+  @D() Z: number;
+  @D() Heading: number;
+
+  @D() _pad1: number;
+  @D() MAtkSpd: number;
+  @D() PAtkSpd: number;
+
+  @D() RunSpeed: number;
+  @D() WalkSpeed: number;
+  @D() SwimRunSpeed: number;
+  @D() SwimWalkSpeed: number;
+  @D() FlyRunSpeed: number;
+  @D() FlyWalkSpeed: number;
+
+  @D() _flyRunSpd1: number;
+  @D() _flyWalkSpd1: number;
+
+  @F() SpeedMultiplier: number;
+  @F() AtkSpdMultiplier: number;
+  @F() _collisionRadius: number;
+  @F() _collisionHeight: number;
+
+  @D() _rhandId: number;
+  @D() _chestId: number;
+  @D() _lhandId: number;
+
+  @C() _unkn1: number; // name above char 1=true ... ??
+  @C(transformIs1) IsRunning: boolean;
+  @C(transformIs1) IsInCombat: boolean;
+  @C(transformIs1) IsDead: boolean;
+  @C({ transform: (value: number) => value === 2 }) _isSummoned: boolean; // invisible ?? 0=false 1=true 2=summoned (only works if model has a summon animation)
+
+  @D() _unkn2: number;
+  @S() _name: string;
+  @D() _unkn3: number;
+  @S() Title: string;
+
+  @D() _pad2: number; // Title color 0=client default
+  @D() _pad3: number; // pvp flag
+  @D() _pad4: number; // karma
+
+  @D() _invisibleVisualEffect: number;
+  @D() _clanId: number;
+  @D() _clanCrest: number;
+  @D() _allyId: number;
+  @D() _allyCrest: number;
+
+  @C() _insideZone: number; // 1=water, 2=flying
+  @C() _teamId: number;
+
+  @F() _collisionRadius1: number;
+  @F() _collisionHeight2: number;
+  @D() _enchantEffect: number; // C4
+  @D(transformIs1) _isFlying: boolean; // C6
+  @D() _pad5: number;
+  @D() _colorEffect: number; // CT1.5 Pet form and skills, Color effect
+
+  @C(transformIs1) IsTargetable: boolean;
+  @C(transformIs1) _isShowName: boolean;
+  @D() _abnormalVisualEffectSpecial: number;
+  @D() _displayEffect: number;
+}
 
 export default class NpcInfo extends AbstractNpcInfo {
   ObjectId!: number;
@@ -10,94 +83,49 @@ export default class NpcInfo extends AbstractNpcInfo {
 
   // @Override
   readImpl(): boolean {
-    const _id: number = this.readC();
-    this.ObjectId = this.readD();
-    const _idTemplate = this.readD() - 1000000;
-    this.IsAttackable = this.readD() === 1;
+    const packetData = this.readModel(PacketModel);
+
+    this.ObjectId = packetData.ObjectId;
+    this.IsAttackable = packetData.IsAttackable;
+
+    const idTemplate = packetData._idTemplate - 1000000;
 
     if (this.IsAttackable) {
       this.Creature = new L2Mob();
-      this.Creature.Name = `Mob #${_idTemplate}`;
+      this.Creature.Name = `Mob #${idTemplate}`;
     } else {
       this.Creature = new L2Npc();
-      this.Creature.Name = `NPC #${_idTemplate}`;
+      this.Creature.Name = `NPC #${idTemplate}`;
     }
 
-    this.Creature.Id = _idTemplate;
+    this.Creature.Id = idTemplate;
     this.Creature.ObjectId = this.ObjectId;
     this.Creature.IsAttackable = this.IsAttackable;
-    this.Creature.X = this.readD();
-    this.Creature.Y = this.readD();
-    this.Creature.Z = this.readD();
+    this.Creature.X = packetData.X;
+    this.Creature.Y = packetData.Y;
+    this.Creature.Z = packetData.Z;
+    this.Creature.Heading = packetData.Heading;
 
-    this.Creature.Heading = this.readD();
+    this.Creature.MAtkSpd = packetData.MAtkSpd;
+    this.Creature.PAtkSpd = packetData.PAtkSpd;
 
-    const _pad1 = this.readD();
-    this.Creature.MAtkSpd = this.readD();
-    this.Creature.PAtkSpd = this.readD();
+    this.Creature.RunSpeed = packetData.RunSpeed;
+    this.Creature.WalkSpeed = packetData.WalkSpeed;
+    this.Creature.SwimRunSpeed = packetData.SwimRunSpeed;
+    this.Creature.SwimWalkSpeed = packetData.SwimWalkSpeed;
+    this.Creature.FlyRunSpeed = packetData.FlyRunSpeed;
+    this.Creature.FlyWalkSpeed = packetData.FlyWalkSpeed;
 
-    this.Creature.RunSpeed = this.readD();
-    this.Creature.WalkSpeed = this.readD();
-    this.Creature.SwimRunSpeed = this.readD();
-    this.Creature.SwimWalkSpeed = this.readD();
-    this.Creature.FlyRunSpeed = this.readD();
-    this.Creature.FlyWalkSpeed = this.readD();
+    this.Creature.SpeedMultiplier = packetData.SpeedMultiplier;
+    this.Creature.AtkSpdMultiplier = packetData.AtkSpdMultiplier;
 
-    const _flyRunSpd1 = this.readD();
-    const _flyWalkSpd1 = this.readD();
+    this.Creature.IsRunning = packetData.IsRunning;
+    this.Creature.IsInCombat = packetData.IsInCombat;
+    this.Creature.IsDead = packetData.IsDead;
 
-    this.Creature.SpeedMultiplier = this.readF();
-    this.Creature.AtkSpdMultiplier = this.readF();
-    const _collisionRadius = this.readF();
-    const _collisionHeight = this.readF();
+    this.Creature.Title = packetData.Title;
 
-    const rhandId = this.readD();
-    const chestId = this.readD();
-    const lhandId = this.readD();
-    // this.Creature.getTemplate().RhandId = this.readD(); // right hand weapon
-    // this.Creature.getTemplate().ChestId = this.readD();
-    // this.Creature.getTemplate().LhandId = this.readD(); // left hand weapon
-
-    const _unkn1 = this.readC(); // name above char 1=true ... ??
-    this.Creature.IsRunning = this.readC() === 1;
-    this.Creature.IsInCombat = this.readC() === 1;
-    this.Creature.IsDead = this.readC() === 1;
-    const _isSummoned = this.readC() === 2; // invisible ?? 0=false 1=true 2=summoned (only works if model has a summon animation)
-
-    const _unkn2 = this.readD();
-    // this.Creature.Name = this.readS();
-    const _name = this.readS();
-    const _unkn3 = this.readD();
-    this.Creature.Title = this.readS();
-
-    const _pad2 = this.readD();
-    const _pad3 = this.readD();
-    const _pad4 = this.readD();
-
-    // let _titleColor = this.readD(); // Title color 0=client default
-    // let _pvpFlag = this.readD(); // pvp flag
-    // let _karma = this.readD(); // karma
-
-    const _invisibleVisualEffect = this.readD();
-    const _clanId = this.readD();
-    const _clanCrest = this.readD();
-    const _allyId = this.readD();
-    const _allyCrest = this.readD();
-
-    const _insideZone = this.readC(); // 1=water, 2=flying
-    const _teamId = this.readC();
-
-    const _collisionRadius1 = this.readF();
-    const _collisionHeight2 = this.readF();
-    const _enchantEffect = this.readD(); // C4
-    const _isFlying = this.readD() === 1; // C6
-    const _pad5 = this.readD();
-    const _colorEffect = this.readD(); // CT1.5 Pet form and skills, Color effect
-
-    this.Creature.IsTargetable = this.readC() === 1;
-    const _isShowName = this.readC() === 1;
-    const _abnormalVisualEffectSpecial = this.readD();
-    const _displayEffect = this.readD();
+    this.Creature.IsTargetable = packetData.IsTargetable;
 
     return true;
   }

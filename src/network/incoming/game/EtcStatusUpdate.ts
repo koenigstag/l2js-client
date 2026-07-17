@@ -1,5 +1,18 @@
+import { BasePacketModel, C, D } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
-import L2Buff from "../../../entities/L2Buff";
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+  @D() Charges: number; // 1-7 increase force, lvl
+  @D() WeightPenalty: number; // 1-4 weight penalty, lvl (1=50%, 2=66.6%, 3=80%, 4=100%)
+  @D() MessageRefusal: number; // 1 = block all chat
+  @D() InsideDangerZone: number;
+  @D() ExpertiseWeaponPenalty: number; // Weapon Grade Penalty [1-4]
+  @D() ExpertiseArmorPenalty: number; // Armor Grade Penalty [1-4]
+  @D() HasCharmOfCourage: number; // 1 = charm of courage (allows resurrection on the same spot upon death on the siege battlefield)
+  @D() DeathPenaltyBuffLevel: number; // 1-15 death penalty, lvl (combat ability decreased due to death)
+  @D() ChargedSouls: number;
+}
 
 export default class EtcStatusUpdate extends GameClientPacket {
   static readonly ETC_DANGER_AREA: number = 4268;
@@ -36,17 +49,17 @@ export default class EtcStatusUpdate extends GameClientPacket {
 
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
+    const packetData = this.readModel(PacketModel);
 
-    this.Charges = this.readD(); // 1-7 increase force, lvl
-    this.WeightPenalty = this.readD(); // 1-4 weight penalty, lvl (1=50%, 2=66.6%, 3=80%, 4=100%)
-    this.MessageRefusal = this.readD(); // 1 = block all chat
-    this.InsideDangerZone = this.readD();
-    this.ExpertiseWeaponPenalty = this.readD(); // Weapon Grade Penalty [1-4]
-    this.ExpertiseArmorPenalty = this.readD(); // Armor Grade Penalty [1-4]
-    this.HasCharmOfCourage = this.readD(); // 1 = charm of courage (allows resurrection on the same spot upon death on the siege battlefield)
-    this.DeathPenaltyBuffLevel = this.readD(); // 1-15 death penalty, lvl (combat ability decreased due to death)
-    this.ChargedSouls = this.readD();
+    this.Charges = packetData.Charges;
+    this.WeightPenalty = packetData.WeightPenalty;
+    this.MessageRefusal = packetData.MessageRefusal;
+    this.InsideDangerZone = packetData.InsideDangerZone;
+    this.ExpertiseWeaponPenalty = packetData.ExpertiseWeaponPenalty;
+    this.ExpertiseArmorPenalty = packetData.ExpertiseArmorPenalty;
+    this.HasCharmOfCourage = packetData.HasCharmOfCourage;
+    this.DeathPenaltyBuffLevel = packetData.DeathPenaltyBuffLevel;
+    this.ChargedSouls = packetData.ChargedSouls;
 
     return true;
   }

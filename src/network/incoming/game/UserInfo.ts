@@ -1,3 +1,5 @@
+import { transformIs1 } from "../../../utils";
+import { BasePacketModel, C, D, F, H, Q, S } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
 import GameServerPacket from "../../outgoing/game/GameServerPacket";
 import L2User from "../../../entities/L2User";
@@ -6,178 +8,283 @@ import { HairColor } from "../../../enums/HairColor";
 import { Face } from "../../../enums/Face";
 import { ClassId } from "../../../enums/ClassId";
 
+class PacketModelPart1 extends BasePacketModel {
+  @C() _id: number;
+
+  @D() X: number;
+  @D() Y: number;
+  @D() Z: number;
+  @D() _vehicleId: number;
+
+  @D() ObjectId: number;
+  @S() Name: string;
+  @D() Race: number;
+  @D() Sex: number;
+
+  @D() BaseClassId: number;
+  @D() Level: number;
+  @Q() Exp: number;
+  @F() _percentFromCurrentLevel: number;
+
+  @D() STR: number;
+  @D() DEX: number;
+  @D() CON: number;
+  @D() INT: number;
+  @D() WIT: number;
+  @D() MEN: number;
+
+  @D() MaxHp: number;
+  @D() Hp: number;
+  @D() MaxMp: number;
+  @D() Mp: number;
+  @D() Sp: number;
+
+  @D() Load: number; // inventory => totalWeight
+  @D() MaxLoad: number;
+
+  @D({ transform: (value: number) => value === 40 }) _activeWeapon: boolean; // 20 no weapon, 40 weapon equipped
+}
+
+class PacketModelPart2 extends BasePacketModel {
+  @D() _talismanSlots: number;
+  @D(transformIs1) _canEquipCloak: boolean;
+
+  @D() PAtk: number;
+  @D() PAtkSpd: number;
+  @D() PDef: number;
+  @D() EvasionRate: number;
+  @D() Accuracy: number;
+  @D() Crit: number;
+  @D() MAtk: number;
+  @D() MAtkSpd: number;
+
+  @D() _pAtkSpd1: number;
+  @D() MDef: number;
+  @D() _pvpFlag: number;
+  @D() Karma: number;
+
+  @D() RunSpeed: number;
+  @D() WalkSpeed: number;
+  @D() SwimRunSpeed: number;
+  @D() SwimWalkSpeed: number;
+  @D() FlyRunSpeed: number;
+  @D() FlyWalkSpeed: number;
+  @D() _flyRunSpdAgain: number;
+  @D() _flyWalkSpeedAgain: number;
+
+  @F() SpeedMultiplier: number;
+  @F() AtkSpdMultiplier: number;
+  @F() _collisionRadius: number;
+  @F() _collisionHeight: number;
+
+  @D() HairStyle: number;
+  @D() HairColor: number;
+  @D() Face: number;
+
+  @D(transformIs1) IsGM: boolean;
+
+  @S() Title: string;
+  @D() ClanId: number;
+  @D() _clanCrestId: number;
+  @D() _allyId: number;
+  @D() _allyCrestId: number;
+
+  // 0x40 leader rights
+  // siege flags: attacker - 0x180 sword over name, defender - 0x80 shield, 0xC0 crown (|leader), 0x1C0 flag (|leader)
+  @D() _relation: number;
+
+  @C() MountType: number;
+  @C() PrivateStoreType: number;
+  @C(transformIs1) CanCrystalizeItems: boolean;
+
+  @D() PkKills: number;
+  @D() PvpKills: number;
+}
+
+class CubicIdModel extends BasePacketModel {
+  @H() _cubicId: number;
+}
+
+class PacketModelPart3 extends BasePacketModel {
+  @C(transformIs1) _isInPartyMatchRoom: boolean;
+  @D(transformIs1) _isInvisible: boolean;
+  @C() MovementType: number; // 1 - in water; 2 - in the air; 0 - ground
+
+  @D() ClanPrivileges: number;
+
+  @H() RecommLeft: number;
+  @H() RecommHave: number;
+  @D({ transform: (value: number) => value - 1000000 }) _mountNpcId: number;
+  @H() _inventoryLimit: number;
+
+  @D() ClassId: number;
+
+  @D() _unk0: number;
+
+  @D() MaxCp: number;
+  @D() Cp: number;
+
+  @C() _mountEffect: number;
+  @C() _teamId: number;
+
+  @D() _clanCrestLargeId: number;
+
+  @C(transformIs1) IsNoble: boolean;
+  @C(transformIs1) IsHero: boolean;
+  @C(transformIs1) IsFishing: boolean;
+
+  @D() _fishX: number;
+  @D() _fishY: number;
+  @D() _fishZ: number;
+
+  @D() _nameColor: number;
+
+  @C(transformIs1) IsRunning: boolean;
+
+  @D() _pledgeClass: number;
+  @D() _pledgeType: number;
+
+  @D() _titleColor: number;
+
+  @D() _cursedWeaponId: number;
+  @D() _transformationDisplayId: number;
+
+  @H() _attackAttribute: number;
+  @H() AtkElementPower: number;
+  @H() _atkFire: number;
+  @H() _atkWater: number;
+  @H() _atkWind: number;
+  @H() _atkEarth: number;
+  @H() _atkHoly: number;
+  @H() _atkDark: number;
+
+  @D() _agathionId: number;
+
+  @D() Fame: number;
+
+  @D(transformIs1) _isMinimapAllowed: boolean;
+  @D() VitalityPoints: number;
+  @D() _abnormalVisualEffectSpecial: number;
+}
+
 export default class UserInfo extends GameClientPacket {
   User!: L2User;
 
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
+    const part1 = this.readModel(PacketModelPart1);
 
     this.User = new L2User();
 
-    this.User.X = this.readD();
-    this.User.Y = this.readD();
-    this.User.Z = this.readD();
-    const _vehicleId = this.readD();
+    this.User.X = part1.X;
+    this.User.Y = part1.Y;
+    this.User.Z = part1.Z;
 
-    this.User.ObjectId = this.readD();
-    this.User.Name = this.readS();
-    this.User.Race = this.readD();
-    this.User.Sex = this.readD();
+    this.User.ObjectId = part1.ObjectId;
+    this.User.Name = part1.Name;
+    this.User.Race = part1.Race;
+    this.User.Sex = part1.Sex;
 
-    this.User.BaseClassId = (ClassId as any)[this.readD()];
-    this.User.Level = this.readD();
-    this.User.Exp = this.readQ();
-    const _percentFromCurrentLevel = this.readF();
+    this.User.BaseClassId = (ClassId as any)[part1.BaseClassId];
+    this.User.Level = part1.Level;
+    this.User.Exp = part1.Exp;
 
-    this.User.STR = this.readD();
-    this.User.DEX = this.readD();
-    this.User.CON = this.readD();
-    this.User.INT = this.readD();
-    this.User.WIT = this.readD();
-    this.User.MEN = this.readD();
+    this.User.STR = part1.STR;
+    this.User.DEX = part1.DEX;
+    this.User.CON = part1.CON;
+    this.User.INT = part1.INT;
+    this.User.WIT = part1.WIT;
+    this.User.MEN = part1.MEN;
 
-    this.User.MaxHp = this.readD();
-    this.User.Hp = this.readD();
-    this.User.MaxMp = this.readD();
-    this.User.Mp = this.readD();
-    this.User.Sp = this.readD();
+    this.User.MaxHp = part1.MaxHp;
+    this.User.Hp = part1.Hp;
+    this.User.MaxMp = part1.MaxMp;
+    this.User.Mp = part1.Mp;
+    this.User.Sp = part1.Sp;
 
-    this.User.Load = this.readD(); // inventory => totalWeight
-    this.User.MaxLoad = this.readD();
+    this.User.Load = part1.Load;
+    this.User.MaxLoad = part1.MaxLoad;
 
-    const _activeWeapon = this.readD() === 40; // 20 no weapon, 40 weapon equipped
-
-    GameServerPacket.PAPERDOLL_ORDER.forEach((value) => {
+    GameServerPacket.PAPERDOLL_ORDER.forEach(() => {
       const _slot1 = this.readD();
     });
 
-    GameServerPacket.PAPERDOLL_ORDER.forEach((value) => {
+    GameServerPacket.PAPERDOLL_ORDER.forEach(() => {
       const _slot2 = this.readD();
     });
 
-    GameServerPacket.PAPERDOLL_ORDER.forEach((value) => {
+    GameServerPacket.PAPERDOLL_ORDER.forEach(() => {
       const _slot3 = this.readD();
     });
 
-    const _talismanSlots = this.readD();
-    const _canEquipCloak = this.readD() === 1;
+    const part2 = this.readModel(PacketModelPart2);
 
-    this.User.PAtk = this.readD();
-    this.User.PAtkSpd = this.readD();
-    this.User.PDef = this.readD();
-    this.User.EvasionRate = this.readD();
-    this.User.Accuracy = this.readD();
-    this.User.Crit = this.readD();
-    this.User.MAtk = this.readD();
-    this.User.MAtkSpd = this.readD();
+    this.User.PAtk = part2.PAtk;
+    this.User.PAtkSpd = part2.PAtkSpd;
+    this.User.PDef = part2.PDef;
+    this.User.EvasionRate = part2.EvasionRate;
+    this.User.Accuracy = part2.Accuracy;
+    this.User.Crit = part2.Crit;
+    this.User.MAtk = part2.MAtk;
+    this.User.MAtkSpd = part2.MAtkSpd;
 
-    const _pAtkSpd1 = this.readD();
-    this.User.MDef = this.readD();
-    const _pvpFlag = this.readD();
-    this.User.Karma = this.readD();
+    this.User.MDef = part2.MDef;
+    this.User.Karma = part2.Karma;
 
-    this.User.RunSpeed = this.readD();
-    this.User.WalkSpeed = this.readD();
-    this.User.SwimRunSpeed = this.readD();
-    this.User.SwimWalkSpeed = this.readD();
-    this.User.FlyRunSpeed = this.readD();
-    this.User.FlyWalkSpeed = this.readD();
-    const _flyRunSpdAgain = this.readD();
-    const _flyWalkSpeedAgain = this.readD();
+    this.User.RunSpeed = part2.RunSpeed;
+    this.User.WalkSpeed = part2.WalkSpeed;
+    this.User.SwimRunSpeed = part2.SwimRunSpeed;
+    this.User.SwimWalkSpeed = part2.SwimWalkSpeed;
+    this.User.FlyRunSpeed = part2.FlyRunSpeed;
+    this.User.FlyWalkSpeed = part2.FlyWalkSpeed;
 
-    this.User.SpeedMultiplier = this.readF();
-    this.User.AtkSpdMultiplier = this.readF();
-    const _collisionRadius = this.readF();
-    const _collisionHeight = this.readF();
+    this.User.SpeedMultiplier = part2.SpeedMultiplier;
+    this.User.AtkSpdMultiplier = part2.AtkSpdMultiplier;
 
-    this.User.HairStyle = (HairStyle as any)[this.readD()];
-    this.User.HairColor = (HairColor as any)[this.readD()];
-    this.User.Face = (Face as any)[this.readD()];
+    this.User.HairStyle = (HairStyle as any)[part2.HairStyle];
+    this.User.HairColor = (HairColor as any)[part2.HairColor];
+    this.User.Face = (Face as any)[part2.Face];
 
-    this.User.IsGM = this.readD() === 1;
+    this.User.IsGM = part2.IsGM;
 
-    this.User.Title = this.readS();
-    this.User.ClanId = this.readD();
-    const _clanCrestId = this.readD();
-    const _allyId = this.readD();
-    const _allyCrestId = this.readD();
+    this.User.Title = part2.Title;
+    this.User.ClanId = part2.ClanId;
 
-    // 0x40 leader rights
-    // siege flags: attacker - 0x180 sword over name, defender - 0x80 shield, 0xC0 crown (|leader), 0x1C0 flag (|leader)
-    const _relation = this.readD();
+    this.User.MountType = part2.MountType;
+    this.User.PrivateStoreType = part2.PrivateStoreType;
+    this.User.CanCrystalizeItems = part2.CanCrystalizeItems;
 
-    this.User.MountType = this.readC();
-    this.User.PrivateStoreType = this.readC();
-    this.User.CanCrystalizeItems = this.readC() === 1;
-
-    this.User.PkKills = this.readD();
-    this.User.PvpKills = this.readD();
+    this.User.PkKills = part2.PkKills;
+    this.User.PvpKills = part2.PvpKills;
 
     const _cubicsNum = this.readH();
     for (let j = 0; j < _cubicsNum; j++) {
-      const _cubicId = this.readH();
+      this.readModel(CubicIdModel);
     }
 
-    const _isInPartyMatchRoom = this.readC() === 1;
-    const _isInvisible = this.readD() === 1;
-    this.User.MovementType = this.readC(); // 1 - in water; 2 - in the air; 0 - ground
+    const part3 = this.readModel(PacketModelPart3);
 
-    this.User.ClanPrivileges = this.readD();
+    this.User.MovementType = part3.MovementType;
+    this.User.ClanPrivileges = part3.ClanPrivileges;
 
-    this.User.RecommLeft = this.readH();
-    this.User.RecommHave = this.readH();
-    const _mountNpcId = this.readD() - 1000000;
-    const _inventoryLimit = this.readH();
+    this.User.RecommLeft = part3.RecommLeft;
+    this.User.RecommHave = part3.RecommHave;
 
-    this.User.ClassId = (ClassId as any)[this.readD()];
+    this.User.ClassId = (ClassId as any)[part3.ClassId];
 
-    const _unk0 = this.readD();
+    this.User.MaxCp = part3.MaxCp;
+    this.User.Cp = part3.Cp;
 
-    this.User.MaxCp = this.readD();
-    this.User.Cp = this.readD();
+    this.User.IsNoble = part3.IsNoble;
+    this.User.IsHero = part3.IsHero;
+    this.User.IsFishing = part3.IsFishing;
 
-    const _mountEffect = this.readC();
-    const _teamId = this.readC();
+    this.User.IsRunning = part3.IsRunning;
 
-    const _clanCrestLargeId = this.readD();
+    this.User.AtkElementPower = part3.AtkElementPower;
 
-    this.User.IsNoble = this.readC() === 1;
-    this.User.IsHero = this.readC() === 1;
-    this.User.IsFishing = this.readC() === 1;
-
-    const _fishX = this.readD();
-    const _fishY = this.readD();
-    const _fishZ = this.readD();
-
-    const _nameColor = this.readD();
-
-    this.User.IsRunning = this.readC() === 1;
-
-    const _pledgeClass = this.readD();
-    const _pledgeType = this.readD();
-
-    const _titleColor = this.readD();
-
-    const _cursedWeaponId = this.readD();
-    const _transformationDisplayId = this.readD();
-
-    const _attackAttribute = this.readH();
-    this.User.AtkElementPower = this.readH();
-    const _atkFire = this.readH();
-    const _atkWater = this.readH();
-    const _atkWind = this.readH();
-    const _atkEarth = this.readH();
-    const _atkHoly = this.readH();
-    const _atkDark = this.readH();
-
-    const _agathionId = this.readD();
-
-    this.User.Fame = this.readD();
-
-    const _isMinimapAllowed = this.readD() === 1;
-    this.User.VitalityPoints = this.readD();
-    const _abnormalVisualEffectSpecial = this.readD();
+    this.User.Fame = part3.Fame;
+    this.User.VitalityPoints = part3.VitalityPoints;
 
     return true;
   }

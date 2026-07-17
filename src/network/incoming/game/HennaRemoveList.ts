@@ -1,23 +1,29 @@
+import { BasePacketModel, C, D, Q, ArrayModel } from "../../GamePacketModel";
 import GameClientPacket from "./GameClientPacket";
+
+class HennaEntryModel extends BasePacketModel {
+  @D() _dyeId: number;
+  @D() _dyeItemId: number;
+  @D() _cancelCount: number;
+  @D() _unk2: number;
+  @D() _cancelFee: number;
+  @D() _unk3: number; // 00
+  @D() _unk4: number; // 01
+}
+
+class PacketModel extends BasePacketModel {
+  @C() _id: number;
+  @Q() _adena: number;
+  @D() _unk1: number; // 00
+  @D() _emptySlots: number;
+  @ArrayModel(HennaEntryModel, "_emptySlots") _hennas: HennaEntryModel[];
+}
 
 export default class HennaRemoveList extends GameClientPacket {
   // @Override
   readImpl(): boolean {
-    const _id = this.readC();
+    const packetData = this.readModel(PacketModel);
 
-    const _adena = this.readQ();
-    const _unk1 = this.readD(); // 00
-    const _emptySlots = this.readD();
-
-    for (let i = 0; i < 3; i++) {
-      const _dyeId = this.readD();
-      const _dyeItemId = this.readD();
-      const _cancelCount = this.readD();
-      const _unk2 = this.readD();
-      const _cancelFee = this.readD();
-      const _unk3 = this.readD(); // 00
-      const _unk4 = this.readD(); // 01
-    }
     return true;
   }
 }
